@@ -1,0 +1,82 @@
+.pointer {
+    cursor: pointer;
+}
+
+#top-div {
+    background: #4591FF;
+    height: 60px;
+}
+
+#top-div #logo-div {
+    position: absolute;
+    left: 20px;
+    top: 0px;
+    height: 60px;
+    width: 100px;
+}
+
+#top-div #title-div {
+    position: absolute;
+    left: 140px;
+    top: 6px;
+    height: 48px;
+    line-height:24px;
+}
+
+.top-text {
+    height: 24px;
+    font-size: 16px;
+    margin-bottom: 0px;
+    color: white;
+    letter-spacing: 1px;
+    font-family: Helvetica Neue;
+}
+
+.top-button {
+    cursor: pointer;
+    float:left;
+    margin-left:60px;
+}
+
+
+#top-div #page-div {
+    position: absolute;
+    right: 140px;
+    top: 18px;
+    height: 24px;
+    line-height:24px;
+}
+
+#bottom-div {
+    position: relative;
+    top: 600px;
+    height: 100px;
+}
+
+#bottom-div #cut-line {
+    position: absolute;
+    top: 0px;
+    left: 140px;
+    right: 140px;
+    height: 1px;
+    background: #4591FF;
+}
+
+#bottom-div #about-div {
+    position: absolute;
+    top: 10px;
+    left: 140px;
+    right: 140px;
+    line-height: 24px;
+}
+
+.bottom-text {
+    height: 24px;
+    font-size:16px;
+    color: #4591FF;
+    margin-bottom:0px;
+    text-align: right;
+    letter-spacing: 1px;
+    font-family: Helvetica Neue;
+}
+

@@ -1,0 +1,169 @@
+#top-div {
+    background: #4591FF;
+    height: 60px;
+}
+
+#top-div #logo-div {
+    position: absolute;
+    left: 20px;
+    top: 0px;
+    height: 60px;
+    width: 100px;
+}
+
+#top-div #title-div {
+    position: absolute;
+    left: 140px;
+    top: 6px;
+    height: 48px;
+    line-height:24px;
+}
+
+.top-text {
+    height: 24px;
+    font-size: 16px;
+    margin-bottom: 0px;
+    color: white;
+    letter-spacing: 1px;
+    font-family: Helvetica Neue;
+}
+
+.top-button {
+    cursor: pointer;
+    float:left;
+    margin-left:60px;
+}
+
+
+#top-div #page-div {
+    position: absolute;
+    right: 140px;
+    top: 18px;
+    height: 24px;
+    line-height:24px;
+}
+
+#main-div {
+    position: relative;
+    top: 70px;
+    height: 100px;
+}
+
+#main-div #intro-div {
+    position: absolute;
+    top: 50px;
+    left: 140px;
+    right: 140px;
+}
+
+.main-title {
+    font-size: 40px;
+    height: 50px;
+    line-height: 32px;
+    color: #4d4d4d;
+    margin-bottom: 0px;
+    letter-spacing: 1px;
+    font-family: Helvetica Neue;
+}
+
+.main-text {
+    font-size: 14px;
+    line-height: 24px;
+    color: #666666;
+    margin-bottom: 0px;
+    letter-spacing: 0.5px;
+    font-family: Helvetica Neue;
+}
+
+#main-div #intro-div #main-img {
+    position: relative;
+    top: 60px;
+    width: 94%;
+    left: 3%;
+    right: 3%;
+}
+
+.step-img {
+    width: 18%;
+    position: relative;
+    margin-left: 3%;
+    margin-right: 3%;
+}
+
+#main-div #intro-div #right-img {
+    position: absolute;
+    width: 170px;
+    top: 0px;
+    right: 0px;
+}
+
+.share-img {
+    width: 21%;
+    position: relative;
+    margin-left: 10%;
+    margin-right: 0%;
+}
+
+#main-div #intro-div #button-div {
+    position: relative;
+    top: 140px;
+}
+
+#start {
+    position: relative;
+    width: 130px;
+    height: 50px;
+    line-height: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align:center;
+    font-size: 30px;
+    color: white;
+    border-width : 0px;
+    border-style : solid;
+    border-radius: 15px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    font-family: Helvetica Neue;
+}
+
+.hover {
+    background: #2468FF;
+}
+
+.unhover {
+    background: #4591FF;
+}
+
+#bottom-div {
+    position: relative;
+    top: 600px;
+    height: 100px;
+}
+
+#bottom-div #cut-line {
+    position: absolute;
+    top: 0px;
+    left: 140px;
+    right: 140px;
+    height: 1px;
+    background: #4591FF;
+}
+
+#bottom-div #about-div {
+    position: absolute;
+    top: 10px;
+    left: 140px;
+    right: 140px;
+    line-height: 24px;
+}
+
+.bottom-text {
+    height: 24px;
+    font-size:16px;
+    color: #4591FF;
+    margin-bottom:0px;
+    text-align: right;
+    letter-spacing: 1px;
+    font-family: Helvetica Neue;
+}
