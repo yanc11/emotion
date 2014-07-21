@@ -63,8 +63,9 @@ def predict(request):
         save.write(str(class_type)+' '+str(attr_type)+' '+text_attr+other_attr);
         save.close()
         #os.system("cd mysite/predict")
-        os.system("matlab -nojvm -nodesktop -nodisplay -r predict")
-        time.sleep(3)
+        #os.system("matlab -nojvm -nodesktop -nodisplay -r predict")
+        os.system("./../../../../lijingbei/bin/matlab -nojvm -nodesktop -nodisplay -r predict")
+        #time.sleep(3)
         #os.system("cd ../..")
         f = open('predict_res.txt','r')
         result = f.readline()
