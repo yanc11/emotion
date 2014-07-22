@@ -430,7 +430,7 @@ $(document).ready(function() {
     upload_prepare();
     load_stress_time(uid,1,7);
     //predict();
-    //bind_homepage();
+    bind_homepage();
 })
 
 

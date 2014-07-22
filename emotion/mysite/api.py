@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from django.shortcuts import render
 from django.http import HttpResponse
+from weibo import APIClient
 import urllib2
 import json
 import re
@@ -8,12 +9,70 @@ import os
 import time
 basetime = 1325347200
 adaytime = 86400
+APP_KEY = '471383603'
+APP_SECRET = '3bb8250c98409cb5d36202cb1e7078f9'
+CALLBACK_URL = 'http://weibo.emotionanalyser.com'
 
 def get_query(request):
     if request.method == 'GET':
         return request.GET
     else:
         return request.POST
+
+def get_session(request):
+    return request.session.get('uid', None), \
+            request.session.get('access_token', None), \
+            request.session.get('expires_in', None)
+
+def homepage(request):
+    return HttpResponse('<html><head><title>EmotionAnalysis</title><meta property="wb:webmaster" content="bf95619774c33c6c" /></head><body><script type="text/javascript">window.location.href="/static/web/homepage.html"</script></body></html>')
+
+def code(request):
+    code = request.GET['code']
+    client = APIClient(app_key=APP_KEY, app_secret=APP_SECRET, redirect_uri=CALLBACK_URL)
+    r = client.request_access_token(code)
+    request.session['uid'] = r.uid
+    request.session['access_token'] = r.access_token
+    request.session['expires_in'] = r.expires_in
+    return HttpResponse('<html><head><title>EmotionAnalysis</title><meta property="wb:webmaster" content="bf95619774c33c6c" /></head><body><script type="text/javascript">window.location.href="/static/web/view.html"</script></body></html>')
+
+def check_token(uid, token, exp):
+    if (uid == None): 
+        return True
+    if (int(time.time()) > int(exp)):
+        request.session['uid'] = None
+        request.session['access_token'] = None
+        request.session['expires_in'] = None
+        return True
+    return False
+
+def logout(request):
+    request.session['uid'] = None
+    request.session['access_token'] = None
+    request.session['expires_in'] = None
+    return HttpResponse(json.dumps({}))
+
+def get_weibo_by_uid(uid, access_token, expires_in):
+    print uid
+    client = APIClient(app_key=APP_KEY, app_secret=APP_SECRET, redirect_uri=CALLBACK_URL)
+    client.set_access_token(access_token, expires_in)
+    result = client.statuses.user_timeline.get(uid=uid,count=200)
+    weibo = result.get("statuses")
+    return weibo
+
+def getweibo(request):
+    try:
+        print "getweibo!!!!"
+        uid, token, exp = get_session(request)
+        if (check_token(uid, token, exp)):
+            return HttpResponse(json.dumps({'success': -1}))
+        query = get_query(request)
+        weibos = get_weibo_by_uid(uid, token, exp)
+        print weibos
+        result = "今天天气真好！[哈哈]"
+        return HttpResponse(json.dumps({'success': 1, 'content': result}))
+    except:
+        return HttpResponse(json.dumps({'success': 0}))
 
 def test(request):
     return HttpResponse('<meta property="wb:webmaster" content="9e0dbd85c9f959fe" />')
@@ -33,14 +92,7 @@ def parsetext(content):
     return res
 
 
-def getweibo(request):
-    try:
-        print "getweibo!!!!"
-        query = get_query(request)
-        result = "今天天气真好！[哈哈]"
-        return HttpResponse(json.dumps({'success': 1, 'content': result}))
-    except:
-        return HttpResponse(json.dumps({'success': 0}))
+
 
 def predict(request):
     try:

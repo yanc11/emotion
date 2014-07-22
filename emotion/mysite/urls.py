@@ -7,12 +7,14 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
 	#(r'^time/$', current_datetime),
+  url(r'^$', 'mysite.api.homepage'),
   url(r'^api/get_stress$', 'mysite.api.get_stress'),
   url(r'^api/get_stress_by_time$', 'mysite.api.get_stress_by_time'),
   url(r'^api/get_reason$', 'mysite.api.get_reason'),
   url(r'^api/get_keyword$', 'mysite.api.get_keyword'),
   url(r'^api/getweibo$', 'mysite.api.getweibo'),
   url(r'^api/predict$', 'mysite.api.predict'),
+  url(r'^api/code$', 'mysite.api.code'),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
