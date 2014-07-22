@@ -8,7 +8,7 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
+import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -22,7 +22,7 @@ DATABASES = {
     }
 }
 
-import os
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Local time zone for this installation. Choices can be found here:
