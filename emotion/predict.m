@@ -1,3 +1,4 @@
+try
 clear
 include
 fid=fopen('attr41.txt','r');
@@ -31,4 +32,17 @@ fid=fopen('predict_res.txt','w');
 fprintf(fid,'%d',res);
 fclose(fid);
 exit;
-
+catch
+fprintf('error in matlab');
+if class_type==6
+    fid=fopen('predict_res.txt','r');
+    res_old=fscanf(fid,'%d',1);
+    fclose(fid);
+    if res_old>9
+        fid=fopen('predict_res.txt','w');
+        fprintf(fid,'%d',1);
+        fclose(fid);
+    end
+end
+exit;
+end

@@ -12,6 +12,26 @@ adaytime = 86400
 APP_KEY = '471383603'
 APP_SECRET = '3bb8250c98409cb5d36202cb1e7078f9'
 CALLBACK_URL = 'http://weibo.emotionanalyser.com'
+WEIBOS=[]
+
+import urllib
+import cStringIO
+import Image
+from ctypes import *
+def getArtAttribute(url):
+    try:
+        file = cStringIO.StringIO(urllib.urlopen(url).read())
+        img = Image.open(file)
+        img=img.convert('RGB')
+        img.save('tmp.jpg')
+        lib=CDLL("/home/yanchen/libArtAttribute.so")
+        lib.getArtAttribute.restype=c_char_p
+        lib.getArtAttribute.argtype=c_char_p
+        st=lib.getArtAttribute('tmp.jpg')
+        return st.replace(',',' ')
+    except:
+        return "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "
+
 
 def get_query(request):
     if request.method == 'GET':
@@ -28,6 +48,8 @@ def homepage(request):
     return HttpResponse('<html><head><title>EmotionAnalysis</title><meta property="wb:webmaster" content="bf95619774c33c6c" /></head><body><script type="text/javascript">window.location.href="/static/web/homepage.html"</script></body></html>')
 
 def code(request):
+    if not request.GET.has_key('code'):
+        return HttpResponse('<html><head><title>EmotionAnalysis</title><meta property="wb:webmaster" content="bf95619774c33c6c" /></head><body><script type="text/javascript">window.location.href="/static/web/homepage.html"</script></body></html>')
     code = request.GET['code']
     client = APIClient(app_key=APP_KEY, app_secret=APP_SECRET, redirect_uri=CALLBACK_URL)
     r = client.request_access_token(code)
@@ -60,25 +82,52 @@ def get_weibo_by_uid(uid, access_token, expires_in):
     weibo = result.get("statuses")
     return weibo
 
+def lastweibo(request):
+    try:
+        print "getin last weibo"
+        query = get_query(request)
+        cur_num = int(query['num'])
+        print cur_num
+        if cur_num <= 1:
+            return HttpResponse(json.dumps({'success': 0}))
+        cur_num = cur_num-1
+        #print WEIBOS
+        result = WEIBOS[cur_num-1]
+        return HttpResponse(json.dumps({'success': 1, 'content': result,'num':cur_num}))
+    except Exception as e:
+        print e
+        return HttpResponse(json.dumps({'success': 0}))
+
 def getweibo(request):
     try:
         print "getweibo!!!!"
         uid, token, exp = get_session(request)
         if (check_token(uid, token, exp)):
+            print "token expired"
             return HttpResponse(json.dumps({'success': -1}))
         query = get_query(request)
+        print "before get weibo by id"
         weibos = get_weibo_by_uid(uid, token, exp)
-        print weibos
-        result = "今天天气真好！[哈哈]"
-        return HttpResponse(json.dumps({'success': 1, 'content': result}))
-    except:
+        global WEIBOS 
+        WEIBOS = weibos
+        cur_num = int(query['num']);
+        if cur_num >= len(weibos):
+            #cur_num = cur_num
+            return HttpResponse(json.dumps({'success': 0}))
+        else:
+            cur_num = cur_num+1
+        #print weibos
+        result = weibos[cur_num-1]
+        return HttpResponse(json.dumps({'success': 1,'content': result,'num':cur_num}))
+    except Exception as e:
+        print e
         return HttpResponse(json.dumps({'success': 0}))
 
 def test(request):
     return HttpResponse('<meta property="wb:webmaster" content="9e0dbd85c9f959fe" />')
 
 def parsetext(content):
-    #print "start parsing"
+    print "start parsing"
     save = open("mysite/sentiment/weibo_content.txt",'wb')
     #print type(content.encode('utf-8'))
     save.write(content.encode('utf-8'))
@@ -91,12 +140,17 @@ def parsetext(content):
     #res = [int(res) for res in res]
     return res
 
+def get_img_attr(src):
+    img_attr = getArtAttribute(src) + " "
+    return img_attr
 
-
+def get_soc_attr():
+    soc_attr = "0 0 0 "
+    return soc_attr
 
 def predict(request):
     try:
-        #print "getin"
+        print "getin predict"
         query = get_query(request)
         weibo = query['weibo']
         class_type = int(query['class_type'])
@@ -104,14 +158,17 @@ def predict(request):
         text_attr = parsetext(weibo)
         print "parse over"
         save = open("attr41.txt",'wb')
+        img_attr = get_img_attr(query['img'])
+        print img_attr
+        soc_attr = get_soc_attr()
         if attr_type == 0:
             other_attr = ""
         elif attr_type == 1:
-            other_attr = "0 0 0"
+            other_attr = soc_attr
         elif attr_type == 2:
-            other_attr = "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+            other_attr = img_attr
         else:
-            other_attr = "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+            other_attr = img_attr + soc_attr
         save.write(str(class_type)+' '+str(attr_type)+' '+text_attr+other_attr);
         save.close()
         #os.system("cd mysite/predict")

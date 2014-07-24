@@ -15,6 +15,7 @@ urlpatterns = patterns('',
   url(r'^api/getweibo$', 'mysite.api.getweibo'),
   url(r'^api/predict$', 'mysite.api.predict'),
   url(r'^api/code$', 'mysite.api.code'),
+  url(r'^api/lastweibo$', 'mysite.api.lastweibo'),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),

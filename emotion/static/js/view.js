@@ -4,30 +4,20 @@ var URL_REASON = '/api/get_reason';
 var URL_KEYWORD = '/api/get_keyword';
 var URL_GETWEIBO = '/api/getweibo';
 var URL_PREDICT = '/api/predict';
+var URL_LASTWEIBO = '/api/lastweibo';
 var uid = 0;
+var weibos = [];
+var cur_weibo = 0;
 var weibo_content = "";
 var pic;
 var debug;
 var basetime = 1325347200;
 var adaytime = 86400;
 //var items = ['stress', 'stress-time', 'reason', 'keyword', 'map'];
-var items = ['stress', 'stress-time'];//, 'map'];
+var items = ['stress', 'stress-time', 'map'];
 var CLASSTYPE = ['','','两类','','','','六类'];
 var ATTRTYPE = ['文','文社','文图','文图社'];
 
-function checkPic(){ 
-    var picPath = document.getElementById("upload-pic").value;             
-    var type = picPath.substring(picPath.lastIndexOf(".") + 1, picPath.length).toLowerCase(); 
-    if (type != "jpg" && type != "bmp" && type != "png") {                 
-        alert("请上传正确的图片格式");                 
-        return false;             
-    } 
-    return true;         
-}
-
-function openwin() { 
-    window.open("homepage.html", "newwindow", "height=400, width=400, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no") //写成一行
-} 
 
 function upload_prepare() {
     var filesUpload = document.getElementById("files-upload"),
@@ -130,19 +120,83 @@ function upload_prepare() {
     }, false);
 }
 
+function lastweibo(){
+    $.get(URL_LASTWEIBO, {num:cur_weibo}, function(data){
+        debug = data;
+        if (data.success == 1){
+            cur_weibo = data.num;
+            weibos=data.content;
+            weibo_content = data.content["text"];
+            rac=0;
+            rcc=0;
+            rrc=0;//retweeted reposts count
+            if (data.content.hasOwnProperty("retweeted_status")){
+                weibo_content = weibo_content+"//"+ data.content["retweeted_status"]["text"];
+                rac=data.content.retweeted_status.attitudes_count;
+                rcc=data.content.retweeted_status.comments_count;
+                rrc=data.content.retweeted_status.reposts_count;
+            }
+            $('#weibo-content').val(weibo_content);
+            $('#social1').val(data.content["attitudes_count"]+rac);
+            $('#social2').val(data.content["comments_count"]+rcc);
+            $('#social3').val(data.content["reposts_count"]+rrc);
+            if (data.content["pic_urls"].length == 0){
+                document.getElementById("weibo-imgimg").src = "";
+                if (data.content.hasOwnProperty("retweeted_status")){
+                    if (data.content.retweeted_status.pic_urls.length > 0)
+                       document.getElementById("weibo-imgimg").src = data.content.retweeted_status.pic_urls[0].thumbnail_pic;
+                }
+            }
+            else{
+                document.getElementById("weibo-imgimg").src = data.content["pic_urls"][0].thumbnail_pic;
+            }
+            document.getElementById("predict-result").src = "/static/img/0.png";
+        }
+        else{
+            alert("没有上一条微博");
+        }
+    }, 'json');
+}
+
 function getweibo(){
     //$('#weibo-content').val("???????");
-    $.get(URL_GETWEIBO, {uid: uid}, function(data){
+    $.get(URL_GETWEIBO, {num:cur_weibo}, function(data){
+        debug=data;
         if (data.success == 1) {
             //$('#stress-value').html(parseInt(data.stress*100));
             //weibo_content = data.content;
-            $('#weibo-content').val(data.content);
-            $('#social1').val(20);
-            document.getElementById("weibo-imgimg").src = "../img/fengjing.jpg";
+            cur_weibo=data.num;
+            weibos=data.content;
+            weibo_content = data.content["text"];
+            rac=0;
+            rcc=0;
+            rrc=0;//retweeted reposts count
+            if (data.content.hasOwnProperty("retweeted_status")){
+                weibo_content = weibo_content+"//"+ data.content["retweeted_status"]["text"];
+                rac=data.content.retweeted_status.attitudes_count;
+                rcc=data.content.retweeted_status.comments_count;
+                rrc=data.content.retweeted_status.reposts_count;
+            }
+            $('#weibo-content').val(weibo_content);
+            $('#social1').val(data.content["attitudes_count"]+rac);
+            $('#social2').val(data.content["comments_count"]+rcc);
+            $('#social3').val(data.content["reposts_count"]+rrc);
+            if (data.content["pic_urls"].length == 0){
+                document.getElementById("weibo-imgimg").src = "";
+                if (data.content.hasOwnProperty("retweeted_status")){
+                    if (data.content.retweeted_status.pic_urls.length > 0)
+                       document.getElementById("weibo-imgimg").src = data.content.retweeted_status.pic_urls[0].thumbnail_pic; 
+                }
+            }
+            else{
+                document.getElementById("weibo-imgimg").src = data.content["pic_urls"][0].thumbnail_pic;
+            }
+            document.getElementById("predict-result").src = "/static/img/0.png";
             //todo   pic = ...
         }
         else {
-            $('#weibo-content').val("获取失败");
+            //$('#weibo-content').val("获取失败");
+            alert("没有更多微博！");
         }
     }, 'json');
 }
@@ -166,7 +220,11 @@ function predict(){
     }
 
     social=[$('#social1').val(),$('#social2').val(),$('#social3').val()];
-    $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), social:social, class_type:class_type, attr_type:attr_type}, function(data){
+    imgsrc=document.getElementById("weibo-imgimg").src;
+    if (imgsrc=="http://weibo.emotionanalyser.com/static/web/view.html"){
+        imgsrc = "";
+    }
+    $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), social:social,img:imgsrc, class_type:class_type, attr_type:attr_type}, function(data){
         if (data.success == 1) {
             //$('#stress-value').html(parseInt(data.stress*100));
             res = data.result;
@@ -174,6 +232,7 @@ function predict(){
             //<td width="50"><img src="/static/img/4.png"></img></td>
             //<td width="50"><p style="font-size:14px">两类<br>文图社</p></td>
             //<td><p style="font-size:14px">今天天气真好~~</p></td>
+            /*
             newtr = document.createElement("tr");
             newtd1 = document.createElement("td");
             newtd1.width = "60";
@@ -194,9 +253,10 @@ function predict(){
             newtr.appendChild(newtd1);
             newtr.appendChild(newtd2);
             newtr.appendChild(newtd3);
-            document.getElementById("his-table-body").appendChild(newtr);
+            document.getElementById("his-table-body").appendChild(newtr);*/
         }
         else {
+            alert("预测出错");
             //$('#weibo-content').html("获取失败");
         }
     }, 'json');
@@ -205,42 +265,8 @@ function predict(){
 function delimg(){
     document.getElementById("weibo-imgimg").src="";
 }
-/*
-function addOne()
-{
-    var showControl = document.getElementById("txtNumber");
-    showControl.value = parseInt(showControl.value) + 1;
-}
 
-function removeOne()
-{
-    var showControl = document.getElementById("txtNumber");
-    showControl.value = parseInt(showControl.value) - 1;
-    if (parseInt(showControl.value) < 0){
-        showControl.value = 0;
-    }
-}
-*/
-function load_stress(uid) {
-    $.get(URL_STRESS, {uid: uid}, function(data){
-        if (data.success == 1) {
-            $('#stress-value').html(parseInt(data.stress*100));
-        }
-    }, 'json');
-}
-/*
-function load_keyword(uid) {
-    var limit = 20;
-    $.get(URL_KEYWORD, {uid: uid, limit: limit}, function(data){
-        if (data.success == 1) {
-            var s = $("#keyword-list");
-            s.html('');
-            for (var i=0; i<data.data.length; i++) 
-                s.append($("<p></p>").text(data.data[i].keyword));
-        }
-    }, 'json');
-}
-*/
+
 function load_stress_time(uid, from, until) {
     //var from = 8;
     //var until = 14;
@@ -405,6 +431,9 @@ function bind_select() {
     })
     $("#predict-btn").bind('click', function(){
         predict();
+    })
+    $("#last-weibo-btn").bind('click', function(){
+        lastweibo();
     })
     $("#delimg-btn").bind('click', function(){
         delimg();

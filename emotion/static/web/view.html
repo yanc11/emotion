@@ -47,8 +47,8 @@
             <li id="stress-btn" class="active"><a>单条微博情感预测</a></li>
             <li id="stress-time-btn" class="pointer"><a>阶段情感变化</a></li>
             <!--li id="reason-btn" class="pointer"><a>心里压力原因</a></li>
-            <li id="keyword-btn" class="pointer"><a>心里压力关键词</a></li>
-            <li id="map-btn" class="pointer"><a>挖掘更多特征</a></li-->
+            <li id="keyword-btn" class="pointer"><a>心里压力关键词</a></li-->
+            <li id="map-btn" class="pointer"><a>历史记录</a></li>
         </ul>
         <div id="main" style="width:70%; margin-left:auto; margin-right:auto; margin-top:30px;">
             <div id="stress-div" style="">
@@ -65,7 +65,7 @@
                         </p>
                         <ul id="file-list">
                             <li id="weibo-img">
-                                <img id="weibo-imgimg">
+                                <img id="weibo-imgimg" src="">
                             </li>
                         </ul>
                         <button class="btn" id="delimg-btn">删除图片</button>
@@ -101,12 +101,13 @@
                         <img id="predict-result" src="/static/img/0.png"></img>
                     </div>
                     <div style="text-align:center;margin-top:40px;">
-                        <button class="btn" id="get-weibo-btn">获取微博</button>
+                        <button class="btn" id="last-weibo-btn">上一条微博
+                        <button class="btn" id="get-weibo-btn">获取下一条微博</button>
                         <button class="btn" id="predict-btn">开始预测</button>
                     </div>
                 </div>
                 <div style="width:30%;float:right">
-                    <p style="font-size:18px; float:left">预测历史：</p>
+                    <!--p style="font-size:18px; float:left">预测历史：</p>
                     </br>
                     <table id="his-table" width="100%">
                         <tbody id="his-table-body">
@@ -116,7 +117,7 @@
                                 <td>微博内容</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table-->
                     <!--div style="margin-top:40px;"><button class="btn">专业心理测试</button></div>
                     <div style="margin-top:20px;"><button class="btn">帮好友测测</button></div>
                     <div style="margin-top:20px;"><button class="btn">分享给好友</button></div-->
@@ -140,7 +141,7 @@
                 </div>
             </div>
             <div id="map-div" style="display:none">
-                <p style="font-size:20px;">扩展功能，敬请期待</p>
+                <p style="font-size:20px;">微博预测历史记录</p>
             </div>
         </div>
         <!--div id="bottom-div">
