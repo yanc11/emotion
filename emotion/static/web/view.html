@@ -17,6 +17,8 @@
         <script src="/static/js/highcharts.js" type="text/javascript" charset="utf-8"></script>
         <script src="/static/js/common.js" type="text/javascript" charset="utf-8"></script>
         <script src="/static/js/view.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="http://www.amcharts.com/lib/3/amcharts.js"></script>
+<script type="text/javascript" src="http://www.amcharts.com/lib/3/radar.js"></script>
     </head>
     <body>
         <div id="top-div" class="navbar navbar-fixed-top">
@@ -82,7 +84,7 @@
                             <td><input type="text" id="social3" value="0" style="width:30px"></td>
                         </tr></table>
                     </div>
-                    <div style="margin-top:20px">
+                    <!--div style="margin-top:20px">
                         <br/><br/>
                         <p style="font-size:18px; float:left;">情感分类方式：</p>
                         <input type="radio"  name ="emotion-class" value="2" checked>两类(正负)&nbsp;&nbsp;   
@@ -94,11 +96,36 @@
                         <input type="radio"  name ="attr-com" value="1" checked>文本+社会&nbsp;&nbsp;
                         <input type="radio"  name ="attr-com" value="2">文本+图像&nbsp;&nbsp;
                         <input type="radio"  name ="attr-com" value="3">文本+图像+社会
-                    </div>
+                    </div-->
                     <div style="margin-top:20px;">
                         <br/><br/>
                         <p style="font-size:18px; float:left">预测结果：</p>
-                        <img id="predict-result" src="/static/img/0.png"></img>
+                        <!--img id="predict-result" src="/static/img/0.png"></img-->
+                        <div id="2-class-zhutu"></div>
+                        <br/><br/>
+                        <p style="font-size:18px;float:center">六类情感预测概率结果</p>
+                        <table id="6-class-table" width="100%">
+                            <tr>
+                                <td><p id="6-class-p1"></p></td>
+                                <td><div id="6-class-polar1" style="height:250px;width:350px"></div></td>
+                                <td><img id="6-class-face1" src="../img/0.png"></img></td>
+                            </tr>
+                            <tr>
+                                <td><p id="6-class-p2"></p></td>
+                                <td><div id="6-class-polar2" style="height:250px;width:350px"></div></td>
+                                <td><img id="6-class-face2" src="../img/0.png"></img></td>
+                            </tr>
+                            <tr>
+                                <td><p id="6-class-p3"></p></td>
+                                <td><div id="6-class-polar3" style="height:250px;width:350px"></div></td>
+                                <td><img id="6-class-face3" src="../img/0.png"></img></td>
+                            </tr>
+                            <tr>
+                                <td><p id="6-class-p4"></p></td>
+                                <td><div id="6-class-polar4" style="height:250px;width:350px"></div></td>
+                                <td><img id="6-class-face4" src="../img/0.png"></img></td>
+                            </tr>
+                        </table>
                     </div>
                     <div style="text-align:center;margin-top:40px;">
                         <button class="btn" id="last-weibo-btn">上一条微博

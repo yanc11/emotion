@@ -17,6 +17,8 @@ var adaytime = 86400;
 var items = ['stress', 'stress-time', 'map'];
 var CLASSTYPE = ['','','两类','','','','六类'];
 var ATTRTYPE = ['文','文社','文图','文图社'];
+//var myChart;
+//var option={};
 
 
 function upload_prepare() {
@@ -150,7 +152,7 @@ function lastweibo(){
             else{
                 document.getElementById("weibo-imgimg").src = data.content["pic_urls"][0].thumbnail_pic;
             }
-            document.getElementById("predict-result").src = "/static/img/0.png";
+            //document.getElementById("predict-result").src = "/static/img/0.png";
         }
         else{
             alert("没有上一条微博");
@@ -191,7 +193,7 @@ function getweibo(){
             else{
                 document.getElementById("weibo-imgimg").src = data.content["pic_urls"][0].thumbnail_pic;
             }
-            document.getElementById("predict-result").src = "/static/img/0.png";
+            //document.getElementById("predict-result").src = "/static/img/0.png";
             //todo   pic = ...
         }
         else {
@@ -247,8 +249,134 @@ function predict(){
     }
     $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), pl:social[1],zf:social[2],z:social[0],img:imgsrc}, function(data){
         if (data.success == 1) {
-            //$('#stress-value').html(parseInt(data.stress*100));
-            debug = data.result;
+//$('#stress-value').html(parseInt(data.stress*100));
+            res = data.result;
+            neg=[];
+            pos=[];
+            maxi=1;
+            getmaxi=[];
+            for (var j=0; j<=3; j++){
+                pos.push(parseFloat((parseFloat(res["2"+j][1])*100).toFixed(1)));
+                neg.push(parseFloat((parseFloat(res["2"+j][2])*100).toFixed(1)));
+                for (var kk=1;kk<=6;kk++){getmaxi.push(parseFloat(res["6"+j][kk]));}
+            }
+            maxi=Math.max.apply(null,getmaxi);
+	    class6title=["文本预测","文本+社会预测","文本+图像预测","文本+图像+社会预测"];
+            for (var j=0; j <=3; j++){
+                tmpid=j+1;
+                document.getElementById("6-class-p"+tmpid).innerHTML=class6title[j];
+                nn=['生气','恶心','害怕','高兴','伤心','惊讶'];
+                dd=[];
+                for (var kk=1; kk<=6; kk++){
+		    dd.push(parseFloat(res["6"+j][kk]));
+		}
+		//tmpid=j+1;
+		document.getElementById("6-class-face"+tmpid).src="../img/"+res["6"+j][0]+".png";
+                AmCharts.makeChart("6-class-polar"+tmpid, {
+    "type": "radar",
+    "theme": "none",
+    "dataProvider": [{
+        "type": "生气",
+        "litres": dd[0]
+    }, {
+        "type": "恶心",
+        "litres": dd[1]
+    }, {
+        "type": "害怕",
+        "litres": dd[2]
+    }, {
+        "type": "高兴",
+        "litres": dd[3]
+    }, {
+        "type": "伤心",
+        "litres": dd[4]
+    }, {
+        "type": "惊讶",
+        "litres": dd[5]
+    }],
+    "valueAxes": [{
+        "axisTitleOffset": 20,
+        "minimum": 0,
+        "maximum": maxi,
+        "axisAlpha": 0.15
+    }],
+    "startDuration": 2,
+    "graphs": [{
+        "balloonText": "[[value]]%",
+        "bullet": "round",
+        "fillAlphas": 0.3,
+        "valueField": "litres"
+    }],
+    "categoryField": "type"
+});
+}
+            $('#2-class-zhutu').highcharts({
+
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: '两类情感预测概率结果'
+        },
+        xAxis: {
+            categories: ['文本', '文本+社会', '文本+图像', '文本+图像+社会']
+        },
+        yAxis: {
+            min: 0,
+            max: 100,
+            title: {
+                text: '概率'
+            },
+            labels: {
+	        	formatter: function () {
+	        		return this.value+'%';
+	        	}
+	        }
+        },
+        legend: {
+            backgroundColor: '#FFFFFF',
+            reversed: true
+        },
+        plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
+            series: [{
+            name: '负性情感',
+            data: neg,
+            color: '#555555',
+            dataLabels: {
+                enabled: true,
+                color: '#FFFFFF',
+                align: 'center',
+                x: 0,
+                y: 0,
+                style: {
+                    fontSize: '16px',
+                    fontFamily: 'Verdana, sans-serif',
+                    textShadow: '0 0 3px black'
+                }
+            }
+        }, {
+            name: '正性情感',
+            data: pos,
+            color: '#FF0000',
+            dataLabels: {
+                enabled: true,
+                color: '#FFFFFF',
+                align: 'center',
+                x: 0,
+                y: 0,
+                style: {
+                    fontSize: '16px',
+                    fontFamily: 'Verdana, sans-serif',
+                    textShadow: '0 0 3px black'
+                }
+            }
+        }]
+
+    });
             //return res;
             //document.getElementById("predict-result").src = "/static/img/"+res+".png";
             alert("预测完毕");
@@ -495,7 +623,6 @@ $(document).ready(function() {
     load_stress_time(uid,1,7);
     //predict();
     bind_homepage();
+    //myChart = echarts.init(document.getElementById('main')); 
 })
-
-
 
