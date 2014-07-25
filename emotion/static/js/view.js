@@ -201,9 +201,30 @@ function getweibo(){
     }, 'json');
 }
 
+/*function predict(){
+    res_2_1 = predict_once(2,1);
+    res_2_0 = predict_once(2,0);
+    res_2_2 = predict_once(2,2);
+    res_2_3 = predict_once(2,3);
+    res_6_1 = predict_once(6,1);
+    res_6_0 = predict_once(6,0);
+    res_6_2 = predict_once(6,2);
+    res_6_3 = predict_once(6,3);
+    debug=[];
+    debug.concat(res_2_0);
+    debug.concat(res_2_1);
+    debug.concat(res_2_2);
+    debug.concat(res_2_3);
+    debug.concat(res_6_0);
+    debug.concat(res_6_1);
+    debug.concat(res_6_2);
+    debug.concat(res_6_3);
+    alert('预测完成');
+}*/
+
 function predict(){
     //$('#weibo-content').html("OK");
-    var class_type, attr_type;
+    /*var class_type, attr_type;
     var obj = document.getElementsByName("emotion-class");
     for(i=0; i<obj.length; i++){
         if(obj[i].checked){
@@ -217,18 +238,20 @@ function predict(){
             attr_type = obj[i].value;
             break;
         }
-    }
+    }*/
 
     social=[$('#social1').val(),$('#social2').val(),$('#social3').val()];
     imgsrc=document.getElementById("weibo-imgimg").src;
     if (imgsrc=="http://weibo.emotionanalyser.com/static/web/view.html"){
         imgsrc = "";
     }
-    $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), social:social,img:imgsrc, class_type:class_type, attr_type:attr_type}, function(data){
+    $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), pl:social[1],zf:social[2],z:social[0],img:imgsrc}, function(data){
         if (data.success == 1) {
             //$('#stress-value').html(parseInt(data.stress*100));
-            res = data.result;
-            document.getElementById("predict-result").src = "/static/img/"+res+".png";
+            debug = data.result;
+            //return res;
+            //document.getElementById("predict-result").src = "/static/img/"+res+".png";
+            alert("预测完毕");
             //<td width="50"><img src="/static/img/4.png"></img></td>
             //<td width="50"><p style="font-size:14px">两类<br>文图社</p></td>
             //<td><p style="font-size:14px">今天天气真好~~</p></td>
@@ -257,6 +280,8 @@ function predict(){
         }
         else {
             alert("预测出错");
+            //if (class_type==2){return ['1','0.5','0.5']}
+            //else{return ['4','0.167','0.167','0.167','0.167','0.167','0.167']}
             //$('#weibo-content').html("获取失败");
         }
     }, 'json');
@@ -293,7 +318,17 @@ function load_stress_time(uid, from, until) {
                 surprise.push(data.data[j].surprise);
             }
             function formatAuto() {
-                return new Date(this.value*1000).format('mm-dd');
+                ret = new Date(this.value*1000).format('mm-dd');
+                if (ret=='01-01'){
+                    ret = ret+'<br/>元旦';
+                }
+                else if (ret=='01-23'){
+                    ret = ret+'<br/>春节';
+                }
+                else if (ret=='02-14'){
+                    ret = ret+'<br/>情人节';
+                }
+                return ret;
             }
             $('#class2-div').highcharts({
                 chart: {type: 'area'},
@@ -354,7 +389,7 @@ function load_stress_time(uid, from, until) {
                 //yAxis: {title: '情感',plotLines: [{value: 0, width: 1, color: '#808080'}]},
                 yAxis: {title: 'precent'},
                 tooltip: {
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f} millions)<br>',
+                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f})<br>',
                     shared: true
                 },
                 plotOptions: {

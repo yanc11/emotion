@@ -7,6 +7,7 @@ import json
 import re
 import os
 import time
+import numpy
 basetime = 1325347200
 adaytime = 86400
 APP_KEY = '471383603'
@@ -144,45 +145,75 @@ def get_img_attr(src):
     img_attr = getArtAttribute(src) + " "
     return img_attr
 
-def get_soc_attr():
+def get_soc_attr(n1,n2,n3):
     soc_attr = "0 0 0 "
+    if len(WEIBOS)>0:
+        zan=[]
+        pinglun=[]
+        zhuanfa=[]
+        for weibo in WEIBOS:
+            z=weibo['attitudes_count']
+            pl=weibo['comments_count']
+            zf=weibo['reposts_count']
+            if weibo.has_key('retweeted_status'):
+                z=z+weibo['retweeted_status']['attitudes_count']
+                pl=pl+weibo['retweeted_status']['comments_count']
+                zf=zf+weibo['retweeted_status']['reposts_count']
+            zan.append(z)
+            pinglun.append(pl)
+            zhuanfa.append(zf)
+        m1=numpy.mean(pinglun)
+        v1=numpy.var(pinglun)
+        m2=numpy.mean(zhuanfa)
+        v2=numpy.var(zhuanfa)
+        m3=numpy.mean(zan)
+        v3=numpy.var(zan)
+        vc1=(n1-m1)*(n1-m1)/v1
+        vc2=(n2-m2)*(n2-m2)/v2
+        vc3=(n3-m3)*(n3-m3)/v3
+        soc_attr=str(vc1)+' '+str(vc2)+' '+str(vc3)+' '
     return soc_attr
+
 
 def predict(request):
     try:
         print "getin predict"
         query = get_query(request)
         weibo = query['weibo']
-        class_type = int(query['class_type'])
-        attr_type = int(query['attr_type'])
+        #class_type = int(query['class_type'])
+        #attr_type = int(query['attr_type'])
         text_attr = parsetext(weibo)
         print "parse over"
         save = open("attr41.txt",'wb')
         img_attr = get_img_attr(query['img'])
         print img_attr
-        soc_attr = get_soc_attr()
-        if attr_type == 0:
-            other_attr = ""
-        elif attr_type == 1:
-            other_attr = soc_attr
-        elif attr_type == 2:
-            other_attr = img_attr
-        else:
-            other_attr = img_attr + soc_attr
-        save.write(str(class_type)+' '+str(attr_type)+' '+text_attr+other_attr);
+        #print query['social']
+        soc_attr = get_soc_attr(int(query['pl']),int(query['zf']),int(query['z']))
+        print 'socail:'+soc_attr
+        other_attr = img_attr + soc_attr
+        save.write(text_attr+other_attr);
         save.close()
         #os.system("cd mysite/predict")
         #os.system("matlab -nojvm -nodesktop -nodisplay -r predict")
         os.system("./../../../../lijingbei/bin/matlab -nojvm -nodesktop -nodisplay -r predict")
         #time.sleep(3)
         #os.system("cd ../..")
+        result = {}
         f = open('predict_res.txt','r')
-        result = f.readline()
+        #result = f.readline()
+        #result = result.split(' ')
+        for i in range(4):
+            tmp = f.readline().strip('\n').split(' ')
+            result['2'+str(i)]=tmp
+        for i in range(4):
+            tmp = f.readline().strip('\n').split(' ')
+            result['6'+str(i)]=tmp
         f.close()
         print result
         #print "parse over!!"
         return HttpResponse(json.dumps({'success': 1, 'result':result}))
-    except:
+    except Exception as e:
+        print e
         return HttpResponse(json.dumps({'success': 0}))
 
 def get_stress(request):

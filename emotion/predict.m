@@ -1,48 +1,56 @@
 try
-clear
 include
 fid=fopen('attr41.txt','r');
-class_type = fscanf(fid,'%d',1);
-attr = fscanf(fid,'%d',1);
-load(['network/network-' num2str(class_type) '-' num2str(attr) '.mat']);
-load(['thetaOpt/thetaOpt-' num2str(class_type) '-' num2str(attr) '.mat']);
-%load thetaPre-2014-07-10-19-01-21-281.mat;
+all_attr = fscanf(fid,'%f',41);
+fclose(fid);
+shunxu=[1,1,2,2];
+fid=fopen('predict_res.txt','w');
 
-if attr==0
-    attr_num=0;
-elseif attr==1
-    attr_num=3;
-elseif attr==2
-    attr_num=21;
+for class_type=2:4:6
+for i=0:1:3
+if class_type==6
+    attr=shunxu(i+1);
 else
-    attr_num=24;
+    attr=i;
 end
 
 
-[testData,COUNT] = fscanf(fid,'%f',17+attr_num);
-fclose(fid);
+load(['network/network-' num2str(class_type) '-' num2str(attr) '.mat']);
+load(['thetaOpt/thetaOpt-' num2str(class_type) '-' num2str(attr) '.mat']);
 
-%testData=[1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]';
+if attr==0
+    testData=all_attr(1:17);
+elseif attr==1
+    testData=[all_attr(1:17);all_attr(39:41)];
+elseif attr==2
+    testData=all_attr(1:38);
+else
+    testData=all_attr;
+end
+
 result = SAEFeedForward(thetaOpt, testData, network, []);
 [notcare, res] = max(result);
 if class_type==2
     res=res*10+res;
 end
-fid=fopen('predict_res.txt','w');
-fprintf(fid,'%d',res);
+
+fprintf(fid,'%d ',res);
+if class_type==2
+    fprintf(fid,'%f %f\n',result(1),result(2));
+else
+    fprintf(fid,'%f %f %f %f %f %f\n',result(1),result(2),result(3),result(4),result(5),result(6));
+end
+
+end
+end
+
+
+
+
+
 fclose(fid);
-exit;
+
 catch
-fprintf('error in matlab');
-if class_type==6
-    fid=fopen('predict_res.txt','r');
-    res_old=fscanf(fid,'%d',1);
-    fclose(fid);
-    if res_old>9
-        fid=fopen('predict_res.txt','w');
-        fprintf(fid,'%d',1);
-        fclose(fid);
-    end
+    fprintf('error in matlab');
 end
 exit;
-end
