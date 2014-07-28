@@ -5,6 +5,7 @@ var URL_KEYWORD = '/api/get_keyword';
 var URL_GETWEIBO = '/api/getweibo';
 var URL_PREDICT = '/api/predict';
 var URL_LASTWEIBO = '/api/lastweibo';
+var URL_GET_HISTORY = '/api/get_history';
 var uid = 0;
 var weibos = [];
 var cur_weibo = 0;
@@ -224,6 +225,145 @@ function getweibo(){
     alert('预测完成');
 }*/
 
+function set_highcharts(res){
+	    neg=[];
+            pos=[];
+            maxi=1;
+            getmaxi=[];
+            for (var j=0; j<=3; j++){
+                pos.push(parseFloat((parseFloat(res["2"+j][1])*100).toFixed(1)));
+                neg.push(parseFloat((parseFloat(res["2"+j][2])*100).toFixed(1)));
+                for (var kk=1;kk<=6;kk++){getmaxi.push(parseFloat(res["6"+j][kk]));}
+            }
+            maxi=Math.max.apply(null,getmaxi);
+            class6title=["文本预测","文本+社会预测","文本+图像预测","文本+图像+社会预测"];
+            for (var j=0; j <=3; j++){
+                tmpid=j+1;
+                document.getElementById("6-class-p"+tmpid).innerHTML=class6title[j];
+                nn=['生气','恶心','害怕','高兴','伤心','惊讶'];
+                dd=[];
+                for (var kk=1; kk<=6; kk++){
+                    dd.push(parseFloat(res["6"+j][kk]));
+                }
+                //tmpid=j+1;
+                document.getElementById("6-class-face"+tmpid).src="../img/"+res["6"+j][0]+".png";
+                AmCharts.makeChart("6-class-polar"+tmpid, {
+    "type": "radar",
+    "theme": "none",
+    "dataProvider": [{
+        "type": "生气",
+        "litres": dd[0]
+    }, {
+        "type": "恶心",
+        "litres": dd[1]
+    }, {
+        "type": "害怕",
+        "litres": dd[2]
+    }, {
+        "type": "高兴",
+        "litres": dd[3]
+    }, {
+        "type": "伤心",
+        "litres": dd[4]
+    }, {
+        "type": "惊讶",
+        "litres": dd[5]
+    }],
+    "valueAxes": [{
+        "axisTitleOffset": 20,
+        "minimum": 0,
+        "maximum": maxi,
+        "axisAlpha": 0.15
+    }],
+    "startDuration": 2,
+    "graphs": [{
+        "balloonText": "[[value]]%",
+        "bullet": "round",
+        "fillAlphas": 0.3,
+        "valueField": "litres"
+    }],
+    "categoryField": "type"
+});
+}
+            $('#2-class-zhutu').highcharts({
+
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: '两类情感预测概率结果'
+        },
+        xAxis: {
+            categories: ['文本', '文本+社会', '文本+图像', '文本+图像+社会']
+        },
+        yAxis: {
+            min: 0,
+            max: 100,
+            title: {
+                text: '概率'
+            },
+            labels: {
+                        formatter: function () {
+                                return this.value+'%';
+                        }
+                }
+        },
+        legend: {
+            backgroundColor: '#FFFFFF',
+            reversed: true
+        },
+        plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
+            series: [{
+            name: '负性情感',
+            data: neg,
+            color: '#555555',
+            dataLabels: {
+                enabled: true,
+                color: '#FFFFFF',
+                align: 'center',
+                x: 0,
+                y: 0,
+                style: {
+                    fontSize: '16px',
+                    fontFamily: 'Verdana, sans-serif',
+                    textShadow: '0 0 3px black'
+                }
+            }
+        }, {
+            name: '正性情感',
+            data: pos,
+            color: '#FF0000',
+            dataLabels: {
+                enabled: true,
+                color: '#FFFFFF',
+                align: 'center',
+                x: 0,
+                y: 0,
+                style: {
+                    fontSize: '16px',
+                    fontFamily: 'Verdana, sans-serif',
+                    textShadow: '0 0 3px black'
+                }
+            }
+        }]
+});
+}
+
+function get_history(page){
+	$.get(URL_GET_HISTORY, {objPage:page}, function(data){
+		if (data.success == 1){
+			document.getElementById('weibo-content-his').innerHTML = data.result;
+		}
+		else{
+			alert('没有更多历史记录');
+		}
+	},'json');
+}
+
 function predict(){
     //$('#weibo-content').html("OK");
     /*var class_type, attr_type;
@@ -250,7 +390,8 @@ function predict(){
     $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), pl:social[1],zf:social[2],z:social[0],img:imgsrc}, function(data){
         if (data.success == 1) {
 //$('#stress-value').html(parseInt(data.stress*100));
-            res = data.result;
+		set_highcharts(data.result);
+            /*res = data.result;
             neg=[];
             pos=[];
             maxi=1;
@@ -376,7 +517,7 @@ function predict(){
             }
         }]
 
-    });
+    });*/
             //return res;
             //document.getElementById("predict-result").src = "/static/img/"+res+".png";
             alert("预测完毕");
@@ -563,6 +704,12 @@ function load_stress_time(uid, from, until) {
     }, 'json');
 }
 
+function share(){
+emotion_type=['','生气','恶心','害怕','高兴','伤心','惊讶'];
+window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent('我在微博情感分析网weibo.emotionanalyser.com分析了“'+$('#weibo-content').val()+'”的情感，结果是'+emotion_type[parseInt(document.getElementById("6-class-face4").src[44])]+'，一起来玩吧！')+'&url='+encodeURIComponent(location.href) + '&pic=' + document.getElementById("6-class-face4").src,'_blank','width=450,height=400');
+}
+
+//function share(){alert('share');}
 
 function select_item(item) {
     var btn_now = '#' + item + '-btn';
@@ -600,6 +747,9 @@ function bind_select() {
     })
     $("#delimg-btn").bind('click', function(){
         delimg();
+    })
+    $("#share-btn").bind('click', function(){
+        share();
     })
     $("#datepicker").datepicker({dateFormat: 'yy/mm/dd', rangeSelect: true, firstDay: 1, showOn: 'both',
             buttonImageOnly: true, buttonImage: '../img/calendar.jpg', minDate:new Date("2012/01/04"), maxDate:new Date("2012/02/13"),

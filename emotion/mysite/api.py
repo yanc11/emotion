@@ -14,6 +14,7 @@ APP_KEY = '471383603'
 APP_SECRET = '3bb8250c98409cb5d36202cb1e7078f9'
 CALLBACK_URL = 'http://weibo.emotionanalyser.com'
 WEIBOS=[]
+HISTORY={}
 
 import urllib
 import cStringIO
@@ -54,7 +55,10 @@ def code(request):
     code = request.GET['code']
     client = APIClient(app_key=APP_KEY, app_secret=APP_SECRET, redirect_uri=CALLBACK_URL)
     r = client.request_access_token(code)
-    request.session['uid'] = r.uid
+    global HISTORY
+    if (not HISTORY.has_key(str(r.uid))):
+        HISTORY[str(r.uid)] = []
+    request.session['uid'] = str(r.uid)
     request.session['access_token'] = r.access_token
     request.session['expires_in'] = r.expires_in
     return HttpResponse('<html><head><title>EmotionAnalysis</title><meta property="wb:webmaster" content="bf95619774c33c6c" /></head><body><script type="text/javascript">window.location.href="/static/web/view.html"</script></body></html>')
@@ -147,31 +151,37 @@ def get_img_attr(src):
 
 def get_soc_attr(n1,n2,n3):
     soc_attr = "0 0 0 "
-    if len(WEIBOS)>0:
-        zan=[]
-        pinglun=[]
-        zhuanfa=[]
-        for weibo in WEIBOS:
-            z=weibo['attitudes_count']
-            pl=weibo['comments_count']
-            zf=weibo['reposts_count']
-            if weibo.has_key('retweeted_status'):
-                z=z+weibo['retweeted_status']['attitudes_count']
-                pl=pl+weibo['retweeted_status']['comments_count']
-                zf=zf+weibo['retweeted_status']['reposts_count']
-            zan.append(z)
-            pinglun.append(pl)
-            zhuanfa.append(zf)
-        m1=numpy.mean(pinglun)
-        v1=numpy.var(pinglun)
-        m2=numpy.mean(zhuanfa)
-        v2=numpy.var(zhuanfa)
-        m3=numpy.mean(zan)
-        v3=numpy.var(zan)
-        vc1=(n1-m1)*(n1-m1)/v1
-        vc2=(n2-m2)*(n2-m2)/v2
-        vc3=(n3-m3)*(n3-m3)/v3
-        soc_attr=str(vc1)+' '+str(vc2)+' '+str(vc3)+' '
+    try:
+        print "WEIBONUM:"+str(len(WEIBOS))
+        if len(WEIBOS)>0:
+            zan=[]
+            pinglun=[]
+            zhuanfa=[]
+            for weibo in WEIBOS:
+                print 'social weibos'
+                print weibo
+                z=weibo['attitudes_count']
+                pl=weibo['comments_count']
+                zf=weibo['reposts_count']
+                if weibo.has_key('retweeted_status'):
+                    z=z+weibo['retweeted_status']['attitudes_count']
+                    pl=pl+weibo['retweeted_status']['comments_count']
+                    zf=zf+weibo['retweeted_status']['reposts_count']
+                zan.append(z)
+                pinglun.append(pl)
+                zhuanfa.append(zf)
+            m1=numpy.mean(pinglun)
+            v1=numpy.var(pinglun)
+            m2=numpy.mean(zhuanfa)
+            v2=numpy.var(zhuanfa)
+            m3=numpy.mean(zan)
+            v3=numpy.var(zan)
+            vc1=(n1-m1)*(n1-m1)/v1
+            vc2=(n2-m2)*(n2-m2)/v2
+            vc3=(n3-m3)*(n3-m3)/v3
+            soc_attr=str(vc1)+' '+str(vc2)+' '+str(vc3)+' '
+    except:
+        soc_attr = "0 0 0 "
     return soc_attr
 
 
@@ -209,11 +219,25 @@ def predict(request):
             tmp = f.readline().strip('\n').split(' ')
             result['6'+str(i)]=tmp
         f.close()
+        global HISTORY
+        HISTORY[request.session['uid']].append(result)
         print result
         #print "parse over!!"
         return HttpResponse(json.dumps({'success': 1, 'result':result}))
     except Exception as e:
         print e
+        return HttpResponse(json.dumps({'success': 0}))
+
+
+def get_history(request):
+    try:
+        query = get_query(request)
+        uid = request.session['uid']
+        objPage = int(query['objPage'])
+        if (objPage > len(HISTORY[uid])):
+            return HttpResponse(json.dumps({'success': 0}))
+        return HttpResponse(json.dumps({'success': 1, 'result':HISTORY[uid][objPage-1]}))
+    except:
         return HttpResponse(json.dumps({'success': 0}))
 
 def get_stress(request):
