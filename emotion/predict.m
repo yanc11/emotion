@@ -3,7 +3,7 @@ include
 fid=fopen('attr41.txt','r');
 all_attr = fscanf(fid,'%f',41);
 fclose(fid);
-shunxu=[1,1,2,2];
+shunxu=[1,1,2,3];
 fid=fopen('predict_res.txt','w');
 
 for class_type=2:4:6
@@ -21,7 +21,11 @@ load(['thetaOpt/thetaOpt-' num2str(class_type) '-' num2str(attr) '.mat']);
 if attr==0
     testData=all_attr(1:17);
 elseif attr==1
-    testData=[all_attr(1:17);all_attr(39:41)];
+    if i==1
+        testData=[all_attr(1:17);all_attr(39:41)];
+    else
+        testData=[all_attr(1:17);0;0;0];
+    end
 elseif attr==2
     testData=all_attr(1:38);
 else

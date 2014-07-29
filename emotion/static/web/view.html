@@ -15,16 +15,16 @@
         <script src="/static/js/date.format.js" type="text/javascript" charset="utf-8"></script>
         <script src="/static/js/purl.js" type="text/javascript" charset="utf-8"></script>
         <script src="/static/js/highcharts.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/static/js/common.js" type="text/javascript" charset="utf-8"></script>
+        <!--script src="/static/js/common.js" type="text/javascript" charset="utf-8"></script-->
         <script src="/static/js/view.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript" src="http://www.amcharts.com/lib/3/amcharts.js"></script>
 <script type="text/javascript" src="http://www.amcharts.com/lib/3/radar.js"></script>
     </head>
     <body>
         <div id="top-div" class="navbar navbar-fixed-top">
-            <div id="logo-div">
+            <!--div id="logo-div">
                 <img id="logo" src="/static/img/logo.png">
-            </div>
+            </div-->
             <div id="title-div">
                 <p class="top-text">
                 Tsinghua University
@@ -35,46 +35,50 @@
             </div>
             <div id="page-div">
                 <p id="homepage-btn" class="top-text top-button">
-                    Home
+                    返回主页
                 </p>
-                <p id="about-us-btn" class="top-text top-button">
-                    About
+                <!--p id="about-us-btn" class="top-text top-button">
+                    退出
                 </p>
                 <p id="contact-us-btn" class="top-text top-button">
                     Contact
-                </p>
+                </p-->
             </div>
         </div>
         <ul class="nav nav-tabs" style="width:70%; margin-left:auto; margin-right:auto; margin-top:100px;">
-            <li id="stress-btn" class="active"><a>单条微博情感预测</a></li>
-            <li id="stress-time-btn" class="pointer"><a>阶段情感变化</a></li>
+            <li id="stress-btn" class="active"><a>微博情感分析</a></li>
+            <li id="stress-time-btn" class="pointer"><a>大众情感变化</a></li>
             <!--li id="reason-btn" class="pointer"><a>心里压力原因</a></li>
             <li id="keyword-btn" class="pointer"><a>心里压力关键词</a></li-->
             <li id="map-btn" class="pointer"><a>历史记录</a></li>
         </ul>
         <div id="main" style="width:70%; margin-left:auto; margin-right:auto; margin-top:30px;">
             <div id="stress-div" style="">
-                <div style="width:65%; float:left;">
-                    <div style="margin-top:5px">
-                        <p style="font-size:18px; float:left;">微博内容：</p>
-                        <textarea id="weibo-content" style="font-size:18px;margin:0px 0px 10px;width:580px;height:100px;">请点击"获取微博"</textarea>
+                <div style="width:80%; margin-left:auto; margin-right:auto;">
+		    <div style="margin-top:5px">
+			<p style="font-size:26px; text-align:center"><b>微博情感分析</b></p>
+			
+		    </div>
+                    <div style="margin-top:20px">
+			<br/>
+                        <p style="font-size:22px; float:left;">微博内容：</p>
+                        <br/><br/>
+                        <textarea id="weibo-content" style="font-size:18px;margin:0px 0px 10px;width:100%;height:130px;">请点击"获取下一条微博"按钮或者输入希望分析的文字</textarea>
                     </div>
                     <div style="margin-top:20px">
                         <br/>
-                        <p style="font-size:18px; float:left;">微博图片：</p>
-                        <p>
+                        <!--p>
                             <input id="files-upload" type="file" />
-                        </p>
+                        </p-->
                         <ul id="file-list">
                             <li id="weibo-img">
                                 <img id="weibo-imgimg" src="">
                             </li>
                         </ul>
-                        <button class="btn" id="delimg-btn">删除图片</button>
+                        <!--button class="button blue" id="delimg-btn">删除图片</button-->
                     </div>
                     <div style="margin-top:20px">
                         <br/>
-                        <p style="font-size:18px;">微博社会特征：</p>
                         <table><tr>
                             <td><p style="font-size:18px;float:left;">赞</p></td>
                             <td><input type="text" id="social1" value="0" style="width:30px"></td>
@@ -97,27 +101,32 @@
                         <input type="radio"  name ="attr-com" value="2">文本+图像&nbsp;&nbsp;
                         <input type="radio"  name ="attr-com" value="3">文本+图像+社会
                     </div-->
-                    <div style="text-align:center;margin-top:40px;">
+                    <div style="text-align:center;margin-top:60px;">
                         <br/><br/>
-                        <button class="btn" id="last-weibo-btn">上一条微博
-                        <button class="btn" id="get-weibo-btn">获取下一条微博</button>
-                        <button class="btn" id="predict-btn">开始预测</button>
-                        <button class="btn" id="share-btn">分享到微博</button>
+                        <button class="button blue" id="last-weibo-btn">上一条微博</button>
+                        <button class="button blue" id="get-weibo-btn">获取下一条微博</button>
+                        <button class="button blue" id="predict-btn">开始分析</button>
+                        <button class="button blue" id="share-btn">分享到微博</button>
                     </div>
                     <div style="margin-top:20px;">
                         <br/><br/>
-                        <p style="font-size:18px; float:left">预测结果：</p>
+                        <p style="font-size:22px; float:left" id="yucejieguo"></p>
                         <!--img id="predict-result" src="/static/img/0.png"></img-->
                         <div id="2-class-zhutu"></div>
                         <br/><br/>
-                        <p style="font-size:18px;float:center">六类情感预测概率结果</p>
-                        <table id="6-class-table" width="100%">
+                        <p style="font-size:18px;text-align:center" id="liuleijieguo"></p>
+                        <table id="6-class-table" style="width:100%;display:none">
                             <tr>
-                                <td><p id="6-class-p1"></p></td>
-                                <td><div id="6-class-polar1" style="height:250px;width:350px"></div></td>
-                                <td><img id="6-class-face1" src="../img/0.png"></img></td>
+                                <td>
+				    <input type="radio"  name ="attr-com" value="0" onclick="change_6()">文本&nbsp;&nbsp;<br/>
+                        	    <input type="radio"  name ="attr-com" value="1" onclick="change_6()">文本+社会&nbsp;&nbsp;<br/>
+                        	    <input type="radio"  name ="attr-com" value="2" onclick="change_6()">文本+图像&nbsp;&nbsp;<br/>
+                        	    <input type="radio"  name ="attr-com" value="3" onclick="change_6()" checked>文本+图像+社会
+                                </td>
+                                <td><div id="6-class-polar" style="height:350px;width:400px"></div></td>
+                                <td><img id="6-class-face" style="height:100px;width:100px" src="../img/0.png"></img></td>
                             </tr>
-                            <tr>
+                            <!--tr>
                                 <td><p id="6-class-p2"></p></td>
                                 <td><div id="6-class-polar2" style="height:250px;width:350px"></div></td>
                                 <td><img id="6-class-face2" src="../img/0.png"></img></td>
@@ -131,7 +140,7 @@
                                 <td><p id="6-class-p4"></p></td>
                                 <td><div id="6-class-polar4" style="height:250px;width:350px"></div></td>
                                 <td><img id="6-class-face4" src="../img/0.png"></img></td>
-                            </tr>
+                            </tr-->
                         </table>
                     </div>
                     <!--div style="text-align:center;margin-top:40px;">
@@ -158,25 +167,92 @@
                 </div-->
             </div>
             <div id="stress-time-div" style="display:none">
-                <div style="width:70%; float:left;">
+                <div style="width:100%; margin-left:auto; margin-right:auto;">
                     <div>
-                        <p style="text-align:center;font-size:28px;">情感变化曲线</p>
+                        <p style="text-align:center;font-size:26px;"><b>大众情感变化图</b></p>
                     </div>
                     <div>
-                        <p>选择日期: <input type="text" id="datepicker"></p>
+			<br/>
+			<p style="font-size:18px">
+                        	下面两张图以天为单位展示了某一周内微博用户的情感比例变化<br/>
+				我们提供了两种风格的展示图，如果你对下图的形式不满意，可以<a href="javascript:changestyle();">点击我改变风格</a><br/>
+				你可以点击图两侧的箭头切换日期<br/>
+				也可以通过下面的日历选择一天，展示以这一天为中心的一周内的情感变化<br/>
+				选择日期：<input type="text" id="datepicker">
+			</p>
+			<br/>
+			<br/>
                     </div>
-                    <div id="class2-div"></div>
-                    <div id="class6-div"></div>
+                    <div>
+                        <table width="90%">
+			<tr>
+			    <td width="10%"><a href="javascript:decrease_day();"><img src="../img/left.png"></a></td>
+                            <td width="80%"><div id="class2-div"></div></td>
+                            <td width="10%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:increase_day();"><img src="../img/right.png"></a></td>
+			</tr>
+			<tr>
+                            <td width="10%"><a href="javascript:decrease_day();"><img src="../img/left.png"></a></td>
+                            <td width="80%"><div id="class6-div"></div></td>
+                            <td width="10%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:increase_day();"><img src="../img/right.png"></a></td>
+			</tr>
+                        </table>
+                    </div>
                 </div>
-                <div style="float:right">
                     <!--div style="margin-top:40px;"><button class="btn">专业心理测试</button></div>
                     <div style="margin-top:20px;"><button class="btn">帮好友测测</button></div>
                     <div style="margin-top:20px;"><button class="btn">分享给好友</button></div-->
                 </div>
             </div>
             <div id="map-div" style="display:none">
-                <p style="font-size:20px;">微博预测历史记录</p>
-		<p style="font-size:18px;" id="weibo-content-his"></p>
+		<div style="width:65%; margin-left:auto; margin-right:auto;display:none" id="no-his"><p style="font-size:26px;"><b>没有历史记录</b></p></div>
+                <div style="width:65%; margin-left:auto; margin-right:auto;" id="has-his">
+                    <div><p style="font-size:26px;text-align:center"><b>微博分析历史记录</b></p></div>
+		    <div style="margin-top:20px">
+                        <br/>
+                        <p style="font-size:22px; float:left;">微博内容：</p>
+                        <br/><br/>
+                        <p style="font-size:18px" id="weibo-content-his"></p>
+                    </div>
+                    <div style="margin-top:20px">
+                        <br/>
+                        <!--p>
+                            <input id="files-upload" type="file" />
+                        </p-->
+                        <img id="weibo-imgimg-his" src="">
+                        <!--button class="button blue" id="delimg-btn">删除图片</button-->
+                    </div>
+                    <div style="margin-top:20px">
+                        <br/>
+                        <table><tr>
+                            <td><p style="font-size:18px;float:left;">赞：</p></td>
+                            <td><p id="social1-his" style="width:30px">0</td>
+                            <td><p style="font-size:18px;float:left;">&nbsp;&nbsp;评论：</p></td>
+                            <td><p id="social2-his" style="width:30px">0</td>
+                            <td><p style="font-size:18px;float:left;">&nbsp;&nbsp;转发：</p></td>
+                            <td><p id="social3-his" style="width:30px">0</td>
+                        </tr></table>
+                    </div>
+		    <div style="margin-top:20px;">
+                        <br/><br/>
+                        <p style="font-size:22px; float:left">分析结果：</p>
+                        <!--img id="predict-result" src="/static/img/0.png"></img-->
+                        <div id="2-class-zhutu-his"></div>
+                        <br/><br/>
+                        <p style="font-size:18px;text-align:center">六类情感分析概率结果</p>
+                        <table id="6-class-table-his" style="width:100%;">
+                            <tr>
+                                <td><div id="6-class-polar-his" style="height:350px;width:400px"></div></td>
+                                <td><img id="6-class-face-his" style="height:100px;width:100px" src="../img/0.png"></img></td>
+                            </tr>
+			</table>
+		    </div>
+		    <div style="text-align:center">
+			<br/><br/>
+                        <button class="button blue" id="last-his-btn">上一条</button>
+                        <button class="button blue" id="next-his-btn">下一条</button>
+			<br/><br/>
+		    </div>
+		</div>
             </div>
         </div>
         <!--div id="bottom-div">

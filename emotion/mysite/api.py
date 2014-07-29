@@ -8,7 +8,7 @@ import re
 import os
 import time
 import numpy
-basetime = 1325347200
+basetime = 1311868800
 adaytime = 86400
 APP_KEY = '471383603'
 APP_SECRET = '3bb8250c98409cb5d36202cb1e7078f9'
@@ -74,9 +74,9 @@ def check_token(uid, token, exp):
     return False
 
 def logout(request):
-    request.session['uid'] = None
-    request.session['access_token'] = None
-    request.session['expires_in'] = None
+    del request.session['uid']
+    del request.session['access_token']
+    del request.session['expires_in']
     return HttpResponse(json.dumps({}))
 
 def get_weibo_by_uid(uid, access_token, expires_in):
@@ -187,6 +187,9 @@ def get_soc_attr(n1,n2,n3):
 
 def predict(request):
     try:
+        global HISTORY
+        if (not HISTORY.has_key(request.session['uid'])):
+            HISTORY[request.session['uid']] = []
         print "getin predict"
         query = get_query(request)
         weibo = query['weibo']
@@ -219,7 +222,11 @@ def predict(request):
             tmp = f.readline().strip('\n').split(' ')
             result['6'+str(i)]=tmp
         f.close()
-        global HISTORY
+        result['content'] = query['weibo']
+        result['img'] = query['img']
+        result['pl'] = int(query['pl'])
+        result['zf'] = int(query['zf'])
+        result['z'] = int(query['z'])
         HISTORY[request.session['uid']].append(result)
         print result
         #print "parse over!!"
@@ -235,8 +242,8 @@ def get_history(request):
         uid = request.session['uid']
         objPage = int(query['objPage'])
         if (objPage > len(HISTORY[uid])):
-            return HttpResponse(json.dumps({'success': 0}))
-        return HttpResponse(json.dumps({'success': 1, 'result':HISTORY[uid][objPage-1]}))
+            return HttpResponse(json.dumps({'success': 0,'total_page':len(HISTORY[uid])}))
+        return HttpResponse(json.dumps({'success': 1, 'result':HISTORY[uid][objPage-1], 'total_page':len(HISTORY[uid])}))
     except:
         return HttpResponse(json.dumps({'success': 0}))
 
@@ -257,25 +264,34 @@ def get_stress_by_time(request):
         query = get_query(request)
         uid, f, u = query['uid'], int(query['from']), int(query['until'])
         def work(uid, f, u):
-            fid2 = open('mysite/dailyemotion/dailyemotion2.txt','r')
-            fid6 = open('mysite/dailyemotion/dailyemotion6.txt','r')
+            fid = open('mysite/dailyemotion/dailyemotion.txt','r')
+            #fid6 = open('mysite/dailyemotion/dailyemotion6.txt','r')
             #timestamp = []
             ret=[]
+            fid.readline()#first line go away
             for ii in range(f-1):
-                fid2.readline()
-                fid6.readline()
+                fid.readline()
+                #fid6.readline()
             for ii in range(u-f+1):
-                res2 = fid2.readline()
-                res6 = fid6.readline()
-                res2 = res2.split()
-                res6 = res6.split()
-                res2 = [int(res) for res in res2]
-                res6 = [int(res) for res in res6]
+                #res2 = fid2.readline()
+                res = fid.readline()
+                #res2 = res2.split()
+                res = res.split()
+                res6 = []
+                res2 = []
+                #res2 = [int(res) for res in res2]
+                for jj in range(1,7):
+                    if (jj==4):
+                        res6.append(int(res[jj])/3)
+                    else:
+                        res6.append(int(res[jj]))
+                res2.append(res6[3])
+                res2.append(res6[0]+res6[1]+res6[2]+res6[4])
                 ret.append((basetime+adaytime*(f-1+ii), res2[0], res2[1], res6[0], res6[1], res6[2], res6[3], res6[4], res6[5]))
                 #pos.append(res[0])
                 #neg.append(res[1])
-            fid2.close()
-            fid6.close()
+            #fid2.close()
+            fid.close()
             return ret#[(1404144000, 0.5), (1404230400, 0.7), (1404316800, 0.6), \#(1404403200, 0.4), (1404489600, 0.5), (1404576000, 0.9), (1404662400, 0.7)]
         result = work(uid, f, u)
         result = [{'time': t, 'pos': pos, 'neg':neg,'anger':anger,'disgust':disgust,'fear':fear,'happy':happy,'sad':sad,'surprise':surprise} for t, pos, neg, anger,disgust,fear,happy,sad,surprise in result]

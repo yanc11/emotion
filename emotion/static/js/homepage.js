@@ -19,5 +19,5 @@ function bind_start() {
 $(document).ready(function(){
     bind_hover();
     bind_start();
-    bind_homepage();
+    //bind_homepage();
 });

@@ -6,22 +6,29 @@ var URL_GETWEIBO = '/api/getweibo';
 var URL_PREDICT = '/api/predict';
 var URL_LASTWEIBO = '/api/lastweibo';
 var URL_GET_HISTORY = '/api/get_history';
+var URL_LOGOUT = '/api/logout';
 var uid = 0;
 var weibos = [];
 var cur_weibo = 0;
 var weibo_content = "";
 var pic;
+var style=0;
 var debug;
-var basetime = 1325347200;
+var debug_time;
+var basetime = 1311868800;
 var adaytime = 86400;
+var cur_day = 4;
+var cur_his = 1;
 //var items = ['stress', 'stress-time', 'reason', 'keyword', 'map'];
 var items = ['stress', 'stress-time', 'map'];
 var CLASSTYPE = ['','','两类','','','','六类'];
 var ATTRTYPE = ['文','文社','文图','文图社'];
 //var myChart;
 //var option={};
-
-
+var maxi_6=1;
+var src_6=["","","",""];
+var dd_6=[[],[],[],[]];
+/*
 function upload_prepare() {
     var filesUpload = document.getElementById("files-upload"),
         fileList = document.getElementById("file-list");
@@ -45,10 +52,10 @@ function upload_prepare() {
         progressBarContainer.appendChild(progressBar);
         li.appendChild(progressBarContainer);
         
-        /*
-            If the file is an image and the web browser supports FileReader,
-            present a preview in the file list
-        */
+        
+        //    If the file is an image and the web browser supports FileReader,
+        //    present a preview in the file list
+        
         if (typeof FileReader !== "undefined" && (/image/i).test(file.type)) {
             img = document.createElement("img");
             img.id = "weibo-imgimg";
@@ -121,7 +128,7 @@ function upload_prepare() {
     filesUpload.addEventListener("change", function () {
         traverseFiles(this.files);
     }, false);
-}
+}*/
 
 function lastweibo(){
     $.get(URL_LASTWEIBO, {num:cur_weibo}, function(data){
@@ -204,50 +211,11 @@ function getweibo(){
     }, 'json');
 }
 
-/*function predict(){
-    res_2_1 = predict_once(2,1);
-    res_2_0 = predict_once(2,0);
-    res_2_2 = predict_once(2,2);
-    res_2_3 = predict_once(2,3);
-    res_6_1 = predict_once(6,1);
-    res_6_0 = predict_once(6,0);
-    res_6_2 = predict_once(6,2);
-    res_6_3 = predict_once(6,3);
-    debug=[];
-    debug.concat(res_2_0);
-    debug.concat(res_2_1);
-    debug.concat(res_2_2);
-    debug.concat(res_2_3);
-    debug.concat(res_6_0);
-    debug.concat(res_6_1);
-    debug.concat(res_6_2);
-    debug.concat(res_6_3);
-    alert('预测完成');
-}*/
-
-function set_highcharts(res){
-	    neg=[];
-            pos=[];
-            maxi=1;
-            getmaxi=[];
-            for (var j=0; j<=3; j++){
-                pos.push(parseFloat((parseFloat(res["2"+j][1])*100).toFixed(1)));
-                neg.push(parseFloat((parseFloat(res["2"+j][2])*100).toFixed(1)));
-                for (var kk=1;kk<=6;kk++){getmaxi.push(parseFloat(res["6"+j][kk]));}
-            }
-            maxi=Math.max.apply(null,getmaxi);
-            class6title=["文本预测","文本+社会预测","文本+图像预测","文本+图像+社会预测"];
-            for (var j=0; j <=3; j++){
-                tmpid=j+1;
-                document.getElementById("6-class-p"+tmpid).innerHTML=class6title[j];
-                nn=['生气','恶心','害怕','高兴','伤心','惊讶'];
-                dd=[];
-                for (var kk=1; kk<=6; kk++){
-                    dd.push(parseFloat(res["6"+j][kk]));
-                }
-                //tmpid=j+1;
-                document.getElementById("6-class-face"+tmpid).src="../img/"+res["6"+j][0]+".png";
-                AmCharts.makeChart("6-class-polar"+tmpid, {
+function set_6_his(dd,re){
+//dd=dd_6[j];
+maxi=Math.max.apply(null,dd);
+                document.getElementById("6-class-face-his").src="../img/"+re+".png";
+                AmCharts.makeChart("6-class-polar-his", {
     "type": "radar",
     "theme": "none",
     "dataProvider": [{
@@ -284,29 +252,79 @@ function set_highcharts(res){
     }],
     "categoryField": "type"
 });
-}
-            $('#2-class-zhutu').highcharts({
 
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: '两类情感预测概率结果'
-        },
-        xAxis: {
-            categories: ['文本', '文本+社会', '文本+图像', '文本+图像+社会']
-        },
+}
+
+function set_6(j){
+dd=dd_6[j];
+                document.getElementById("6-class-face").src=src_6[j];
+                AmCharts.makeChart("6-class-polar", {
+    "type": "radar",
+    "theme": "none",
+    "dataProvider": [{
+        "type": "生气",
+        "litres": dd[0]
+    }, {
+        "type": "恶心",
+        "litres": dd[1]
+    }, {
+        "type": "害怕",
+        "litres": dd[2]
+    }, {
+        "type": "高兴",
+        "litres": dd[3]
+    }, {
+        "type": "伤心",
+        "litres": dd[4]
+    }, {
+        "type": "惊讶",
+        "litres": dd[5]
+    }],
+    "valueAxes": [{
+        "axisTitleOffset": 20,
+        "minimum": 0,
+        "maximum": maxi_6,
+        "axisAlpha": 0.15
+    }],
+    "startDuration": 2,
+    "graphs": [{
+        "balloonText": "[[value]]%",
+        "bullet": "round",
+        "fillAlphas": 0.3,
+        "valueField": "litres"
+    }],
+    "categoryField": "type"
+});
+
+}
+
+function set_highcharts(res){
+	    neg=[];
+            pos=[];
+            maxi=1;
+            getmaxi=[];
+            for (var j=0; j<=3; j++){
+                pos.push(parseFloat((parseFloat(res["2"+j][1])*100).toFixed(1)));
+                neg.push(parseFloat((parseFloat(res["2"+j][2])*100).toFixed(1)));
+                dd_6[j]=[];
+                src_6[j]="../img/"+res["6"+j][0]+".png";
+                for (var kk=1;kk<=6;kk++){
+                    getmaxi.push(parseFloat(res["6"+j][kk]));
+                    dd_6[j].push(parseFloat(res["6"+j][kk]));
+                }
+            }
+            maxi=Math.max.apply(null,getmaxi);
+            maxi_6 = maxi;
+            set_6(3);
+            $('#2-class-zhutu').highcharts({
+        chart: {type: 'bar'},
+        title: {text: '两类情感分析概率结果'},
+        xAxis: {categories: ['文本', '文本+社会', '文本+图像', '文本+图像+社会']},
         yAxis: {
             min: 0,
             max: 100,
-            title: {
-                text: '概率'
-            },
-            labels: {
-                        formatter: function () {
-                                return this.value+'%';
-                        }
-                }
+            title: {text: '概率'},
+            labels: {formatter: function () {return this.value+'%';}}
         },
         legend: {
             backgroundColor: '#FFFFFF',
@@ -317,12 +335,14 @@ function set_highcharts(res){
                 stacking: 'normal'
             }
         },
+
             series: [{
             name: '负性情感',
             data: neg,
             color: '#555555',
             dataLabels: {
                 enabled: true,
+
                 color: '#FFFFFF',
                 align: 'center',
                 x: 0,
@@ -353,15 +373,115 @@ function set_highcharts(res){
 });
 }
 
+function set_highcharts_his(res){
+            neg=[];
+            pos=[];
+            dd=[[],[],[],[]];
+            for (var j=0; j<=3; j++){
+                pos.push(parseFloat((parseFloat(res["2"+j][1])*100).toFixed(1)));
+                neg.push(parseFloat((parseFloat(res["2"+j][2])*100).toFixed(1)));
+                dd[j]=[];
+                for (var kk=1;kk<=6;kk++){
+                    dd[j].push(parseFloat(res["6"+j][kk]));
+                }
+            }
+            $('#2-class-zhutu-his').highcharts({
+        chart: {type: 'bar'},
+        title: {text: '两类情感分析概率结果'},
+        xAxis: {categories: ['文本', '文本+社会', '文本+图像', '文本+图像+社会']},
+        yAxis: {
+            min: 0,
+            max: 100,
+            title: {text: '概率'},
+            labels: {formatter: function () {return this.value+'%';}}
+        },
+        legend: {
+            backgroundColor: '#FFFFFF',
+            reversed: true
+        },
+        plotOptions: {
+            series: {
+                stacking: 'normal'
+            }
+        },
+            series: [{
+            name: '负性情感',
+            data: neg,
+            color: '#555555',
+            dataLabels: {
+                enabled: true,
+
+                color: '#FFFFFF',
+                align: 'center',
+                x: 0,
+                y: 0,
+                style: {
+                    fontSize: '16px',
+                    fontFamily: 'Verdana, sans-serif',
+                    textShadow: '0 0 3px black'
+                }
+            }
+        }, {
+            name: '正性情感',
+            data: pos,
+            color: '#FF0000',
+            dataLabels: {
+                enabled: true,
+                color: '#FFFFFF',
+                align: 'center',
+                x: 0,
+                y: 0,
+                style: {
+                    fontSize: '16px',
+                    fontFamily: 'Verdana, sans-serif',
+                    textShadow: '0 0 3px black'
+                }
+            }
+        }]
+});
+ set_6_his(dd[3],res["63"][0]);
+}
+
 function get_history(page){
 	$.get(URL_GET_HISTORY, {objPage:page}, function(data){
 		if (data.success == 1){
-			document.getElementById('weibo-content-his').innerHTML = data.result;
+			document.getElementById('weibo-content-his').innerHTML = data.result['content'];
+			document.getElementById('weibo-imgimg-his').src = data.result['img'];
+			document.getElementById('social1-his').innerHTML = data.result['z'];
+                        document.getElementById('social2-his').innerHTML = data.result['pl'];
+                        document.getElementById('social3-his').innerHTML = data.result['zf'];
+			set_highcharts_his(data.result);
+			
 		}
 		else{
-			alert('没有更多历史记录');
+			cur_his=data['total_page'];
+			if (cur_his==0){
+				document.getElementById('no-his').style.display="";
+				document.getElementById('has-his').style.display="none";
+			}
 		}
 	},'json');
+}
+
+function next_his(){
+	cur_his=cur_his+1;
+	get_history(cur_his);
+}
+
+function last_his(){
+	cur_his=cur_his-1;
+	if (cur_his<1){cur_his=1;}
+	else{get_history(cur_his);}
+}
+
+function change_6(){
+	var obj=document.getElementsByName("attr-com");
+	for (i=0;i<obj.length;i++){
+		if (obj[i].checked){
+			set_6(i);
+			break;
+		}
+	}
 }
 
 function predict(){
@@ -381,7 +501,10 @@ function predict(){
             break;
         }
     }*/
-
+    if ($('#weibo-content').val()==""){
+	alert('必须输入微博文本内容');
+	return;
+    }
     social=[$('#social1').val(),$('#social2').val(),$('#social3').val()];
     imgsrc=document.getElementById("weibo-imgimg").src;
     if (imgsrc=="http://weibo.emotionanalyser.com/static/web/view.html"){
@@ -389,166 +512,15 @@ function predict(){
     }
     $.get(URL_PREDICT, {uid: uid, weibo: $('#weibo-content').val(), pl:social[1],zf:social[2],z:social[0],img:imgsrc}, function(data){
         if (data.success == 1) {
+document.getElementById("yucejieguo").innerHTML="<br/><br/>分析结果：";
+document.getElementById("liuleijieguo").innerHTML="六类情感分析概率结果";
+document.getElementById("6-class-table").style.display="";
 //$('#stress-value').html(parseInt(data.stress*100));
 		set_highcharts(data.result);
-            /*res = data.result;
-            neg=[];
-            pos=[];
-            maxi=1;
-            getmaxi=[];
-            for (var j=0; j<=3; j++){
-                pos.push(parseFloat((parseFloat(res["2"+j][1])*100).toFixed(1)));
-                neg.push(parseFloat((parseFloat(res["2"+j][2])*100).toFixed(1)));
-                for (var kk=1;kk<=6;kk++){getmaxi.push(parseFloat(res["6"+j][kk]));}
-            }
-            maxi=Math.max.apply(null,getmaxi);
-	    class6title=["文本预测","文本+社会预测","文本+图像预测","文本+图像+社会预测"];
-            for (var j=0; j <=3; j++){
-                tmpid=j+1;
-                document.getElementById("6-class-p"+tmpid).innerHTML=class6title[j];
-                nn=['生气','恶心','害怕','高兴','伤心','惊讶'];
-                dd=[];
-                for (var kk=1; kk<=6; kk++){
-		    dd.push(parseFloat(res["6"+j][kk]));
-		}
-		//tmpid=j+1;
-		document.getElementById("6-class-face"+tmpid).src="../img/"+res["6"+j][0]+".png";
-                AmCharts.makeChart("6-class-polar"+tmpid, {
-    "type": "radar",
-    "theme": "none",
-    "dataProvider": [{
-        "type": "生气",
-        "litres": dd[0]
-    }, {
-        "type": "恶心",
-        "litres": dd[1]
-    }, {
-        "type": "害怕",
-        "litres": dd[2]
-    }, {
-        "type": "高兴",
-        "litres": dd[3]
-    }, {
-        "type": "伤心",
-        "litres": dd[4]
-    }, {
-        "type": "惊讶",
-        "litres": dd[5]
-    }],
-    "valueAxes": [{
-        "axisTitleOffset": 20,
-        "minimum": 0,
-        "maximum": maxi,
-        "axisAlpha": 0.15
-    }],
-    "startDuration": 2,
-    "graphs": [{
-        "balloonText": "[[value]]%",
-        "bullet": "round",
-        "fillAlphas": 0.3,
-        "valueField": "litres"
-    }],
-    "categoryField": "type"
-});
-}
-            $('#2-class-zhutu').highcharts({
-
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: '两类情感预测概率结果'
-        },
-        xAxis: {
-            categories: ['文本', '文本+社会', '文本+图像', '文本+图像+社会']
-        },
-        yAxis: {
-            min: 0,
-            max: 100,
-            title: {
-                text: '概率'
-            },
-            labels: {
-	        	formatter: function () {
-	        		return this.value+'%';
-	        	}
-	        }
-        },
-        legend: {
-            backgroundColor: '#FFFFFF',
-            reversed: true
-        },
-        plotOptions: {
-            series: {
-                stacking: 'normal'
-            }
-        },
-            series: [{
-            name: '负性情感',
-            data: neg,
-            color: '#555555',
-            dataLabels: {
-                enabled: true,
-                color: '#FFFFFF',
-                align: 'center',
-                x: 0,
-                y: 0,
-                style: {
-                    fontSize: '16px',
-                    fontFamily: 'Verdana, sans-serif',
-                    textShadow: '0 0 3px black'
-                }
-            }
-        }, {
-            name: '正性情感',
-            data: pos,
-            color: '#FF0000',
-            dataLabels: {
-                enabled: true,
-                color: '#FFFFFF',
-                align: 'center',
-                x: 0,
-                y: 0,
-                style: {
-                    fontSize: '16px',
-                    fontFamily: 'Verdana, sans-serif',
-                    textShadow: '0 0 3px black'
-                }
-            }
-        }]
-
-    });*/
-            //return res;
-            //document.getElementById("predict-result").src = "/static/img/"+res+".png";
-            alert("预测完毕");
-            //<td width="50"><img src="/static/img/4.png"></img></td>
-            //<td width="50"><p style="font-size:14px">两类<br>文图社</p></td>
-            //<td><p style="font-size:14px">今天天气真好~~</p></td>
-            /*
-            newtr = document.createElement("tr");
-            newtd1 = document.createElement("td");
-            newtd1.width = "60";
-            newtd2 = document.createElement("td");
-            newtd2.width = "60";
-            newtd3 = document.createElement("td");
-            newimg = document.createElement("img");
-            newimg.src = "/static/img/"+res+".png";
-            newtd1.appendChild(newimg);
-            newp1 = document.createElement("p");
-            newp1.style = "font-size:14px";
-            newp1.innerHTML = CLASSTYPE[parseInt(class_type)]+"<br>"+ATTRTYPE[parseInt(attr_type)];
-            newtd2.appendChild(newp1);
-            newp2 = document.createElement("p");
-            newp2.style = "font-size:14px";
-            newp2.innerHTML = $('#weibo-content').val();
-            newtd3.appendChild(newp2);
-            newtr.appendChild(newtd1);
-            newtr.appendChild(newtd2);
-            newtr.appendChild(newtd3);
-            document.getElementById("his-table-body").appendChild(newtr);*/
+            alert("分析完毕");
         }
         else {
-            alert("预测出错");
+            alert("分析出错");
             //if (class_type==2){return ['1','0.5','0.5']}
             //else{return ['4','0.167','0.167','0.167','0.167','0.167','0.167']}
             //$('#weibo-content').html("获取失败");
@@ -560,23 +532,55 @@ function delimg(){
     document.getElementById("weibo-imgimg").src="";
 }
 
+function logout(){
+	$.get(URL_LOGOUT, {}, function(data){
+		alert("退出成功");
+	});
+}
 
-function load_stress_time(uid, from, until) {
-    //var from = 8;
-    //var until = 14;
-    $.get(URL_STRESS_TIME, {uid: uid, from: from, until: until}, function(data){
+/*function bind_homepage() {
+    $("#homepage-btn").bind('click', function(){
+        window.location.href = '/static/web/homepage.html'
+    });
+    $("#about-us-btn").bind('click', function(){
+	logout();
+        window.location.href = '/static/web/homepage.html'
+    });
+}*/
+
+function load_stress_time(sty) {
+    var from = cur_day-3;
+    var until = cur_day+3;
+    $.get(URL_STRESS_TIME, {uid:get_uid(),from: from, until: until}, function(data){
+        debug_time = data;
         if (data.success == 1) {
+            
             var x = [];
             var pos = [];
             var neg = [];
             var anger = [];
             var disgust = [];
-            var fear = [];
+            var fear = [];            
             var happy = [];
             var sad = [];
             var surprise = [];
             for (var j=0; j<data.data.length; j++) {
+		if (style==0){
+//alert("style==0");
+                sum2=data.data[j].pos+data.data[j].neg;
+                sum6=data.data[j].anger+data.data[j].disgust+data.data[j].fear+data.data[j].happy+data.data[j].sad+data.data[j].surprise;
                 x.push(data.data[j].time);
+                pos.push(data.data[j].pos/sum2);
+                neg.push(data.data[j].neg/sum2);
+                anger.push(data.data[j].anger/sum6);
+                disgust.push(data.data[j].disgust/sum6);
+                fear.push(data.data[j].fear/sum6);
+                happy.push(data.data[j].happy/sum6);
+                sad.push(data.data[j].sad/sum6);
+                surprise.push(data.data[j].surprise/sum6);
+		}
+		else{
+		x.push(data.data[j].time);
                 pos.push(data.data[j].pos);
                 neg.push(data.data[j].neg);
                 anger.push(data.data[j].anger);
@@ -585,43 +589,51 @@ function load_stress_time(uid, from, until) {
                 happy.push(data.data[j].happy);
                 sad.push(data.data[j].sad);
                 surprise.push(data.data[j].surprise);
+		}
             }
             function formatAuto() {
-                ret = new Date(this.value*1000).format('mm-dd');
-                if (ret=='01-01'){
+                ret = new Date(this.value*1000).format('yyyy-<br/>mm-dd');
+                if (ret=='2012-<br/>01-01'){
                     ret = ret+'<br/>元旦';
                 }
-                else if (ret=='01-23'){
-                    ret = ret+'<br/>春节';
+                else if (ret=='2012-<br/>01-22'){
+                    ret = ret+'<br/>除夕';
                 }
-                else if (ret=='02-14'){
+                else if (ret=='2012-<br/>02-14'){
                     ret = ret+'<br/>情人节';
                 }
+                else if (ret=='2012-<br/>10-01'||ret=='2011-<br/>10-01'){
+                    ret = ret+'<br/>国庆节';
+                }
+                else if (ret=='2012-<br/>05-01'){
+                    ret = ret+'<br/>劳动节';
+                }
+
                 return ret;
             }
+	if (style==0){
+//alert("yes");
             $('#class2-div').highcharts({
-                chart: {type: 'area'},
+                chart: {type: 'column'},
                 title: {text: '两类情感变化', x:0},
                 xAxis: {categories: x, labels: {formatter: formatAuto}},
                 //yAxis: {title: '情感',plotLines: [{value: 0, width: 1, color: '#808080'}]},
-                yAxis: {title: 'precent'},
+                yAxis: {min:0,max:1,title: '百分比'},
                 tooltip: {
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f})<br>',
-                    shared: true
-                },
-                plotOptions: {
-                    area: {
-                        stacking: 'percent',
-                        lineColor: '#ffffff',
-                        lineWidth: 1,
-                        marker: {
-                            lineWidth: 1,
-                            lineColor: '#ffffff'
-                        }
-                    }
-                },
-                //legend:{borderWidth:0, itemStyle:{fontSize:'10px'}},
-                //series: [{data:y}]
+            formatter: function() {
+                return new Date(this.x*1000).format('yyyy-mm-dd') +'<br/>'+
+                    this.series.name +': '+ (this.y*100).toFixed(1)+'%';
+            }
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: false,
+                    color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                }
+            }
+        },
                 series: [{
                     name: 'Positive',
                     color: '#FF0000',
@@ -631,49 +643,28 @@ function load_stress_time(uid, from, until) {
                     color: '#555555',
                     data: neg
                 }]
-                /*series: [{
-                    name: 'Happy',
-                    data: [502, 635, 809, 947, 1402, 3634, 5268]
-                }, {
-                    name: 'Surprise',
-                    data: [106, 107, 111, 133, 221, 767, 1766]
-                }, {
-                    name: 'Anger',
-                    data: [163, 203, 276, 408, 547, 729, 628]
-                }, {
-                    name: 'Sad',
-                    data: [180, 310, 540, 156, 339, 818, 1201]
-                }, {
-                    name: 'Fear',
-                    data: [18, 31, 54, 156, 339, 818, 1201]
-                }, {
-                    name: 'Disgust',
-                    data: [2, 2, 2, 6, 13, 30, 46]
-                }]*/
             });
             $('#class6-div').highcharts({
-                chart: {type: 'area'},
+                chart: {type: 'column'},//area
                 title: {text: '六类情感变化', x:0},
                 xAxis: {categories: x, labels: {formatter: formatAuto}},
                 //yAxis: {title: '情感',plotLines: [{value: 0, width: 1, color: '#808080'}]},
-                yAxis: {title: 'precent'},
+                yAxis: {min:0,max:1,title: '百分比'},
                 tooltip: {
-                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f})<br>',
-                    shared: true
-                },
-                plotOptions: {
-                    area: {
-                        stacking: 'percent',
-                        lineColor: '#ffffff',
-                        lineWidth: 1,
-                        marker: {
-                            lineWidth: 1,
-                            lineColor: '#ffffff'
-                        }
-                    }
-                },
-                //legend:{borderWidth:0, itemStyle:{fontSize:'10px'}},
-                //series: [{data:y}]
+            formatter: function() {
+                return new Date(this.x*1000).format('yyyy-mm-dd') +'<br/>'+
+                    this.series.name +': '+ (this.y*100).toFixed(1)+'%';            
+}
+        },
+        plotOptions: {
+            column: {
+                stacking: 'normal',
+                dataLabels: {
+                    enabled: false,
+                    color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+                }
+            }
+        },
                 series: [{
                     name: 'Happy',
                     color: '#FF0000',
@@ -700,13 +691,104 @@ function load_stress_time(uid, from, until) {
                     data: disgust
                 }]
             });
+		}
+		else{
+$('#class2-div').highcharts({
+		                chart: {type: 'area'},
+                title: {text: '两类情感变化', x:0},
+                xAxis: {categories: x, labels: {formatter: formatAuto}},
+                //yAxis: {title: '情感',plotLines: [{value: 0, width: 1, color: '#808080'}]},
+                yAxis: {title: '百分比'},
+		                tooltip: {
+                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f})<br>',
+                    shared: true
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'percent',
+                        lineColor: '#ffffff',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#ffffff'
+                        }
+                    }
+                },
+                //legend:{borderWidth:0, itemStyle:{fontSize:'10px'}},
+                //series: [{data:y}]
+                series: [{
+                    name: 'Positive',
+                    color: '#FF0000',
+                    data: pos
+                }, {
+                    name: 'Negative',
+                    color: '#555555',
+                    data: neg
+                }]
+		});
+		            $('#class6-div').highcharts({
+                chart: {type: 'area'},//area
+                title: {text: '六类情感变化', x:0},
+                xAxis: {categories: x, labels: {formatter: formatAuto}},
+                //yAxis: {title: '情感',plotLines: [{value: 0, width: 1, color: '#808080'}]},
+                yAxis: {title: '百分比'},
+                tooltip: {
+                    pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.percentage:.1f}%</b> ({point.y:,.0f})<br>',
+                    shared: true
+                },
+                plotOptions: {
+                    area: {
+                        stacking: 'percent',
+                        lineColor: '#ffffff',
+                        lineWidth: 1,
+                        marker: {
+                            lineWidth: 1,
+                            lineColor: '#ffffff'
+                        }
+                    }
+                },
+		series: [{
+                    name: 'Happy',
+                    color: '#FF0000',
+                    data: happy
+                }, {
+                    name: 'Surprise',
+                    color: '#FFFF00',
+                    data: surprise
+                }, {
+                    name: 'Anger',
+                    color: '#68228B',
+                    data: anger
+                }, {
+                    name: 'Sad',
+                    color: '#555555',
+                    data: sad
+                }, {
+                    name: 'Fear',
+                    color: '#0000FF',
+                    data: fear
+                }, {
+                    name: 'Disgust',
+                    color: '#228B22',
+                    data: disgust
+                }]
+            });
+
+
+		}
         }
     }, 'json');
 }
 
 function share(){
 emotion_type=['','生气','恶心','害怕','高兴','伤心','惊讶'];
-window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent('我在微博情感分析网weibo.emotionanalyser.com分析了“'+$('#weibo-content').val()+'”的情感，结果是'+emotion_type[parseInt(document.getElementById("6-class-face4").src[44])]+'，一起来玩吧！')+'&url='+encodeURIComponent(location.href) + '&pic=' + document.getElementById("6-class-face4").src,'_blank','width=450,height=400');
+content=$('#weibo-content').val();
+reg=new RegExp("//@.+:","g");
+content=content.replace(reg,"");
+if (content.length>80){
+content=content.substr(0,80)+"...";
+}
+window.open('http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent('我在微博情感分析网weibo.emotionanalyser.com分析了“'+content+'”的情感，结果是'+emotion_type[parseInt(document.getElementById("6-class-face").src[44])]+'，一起来玩吧！')+'&url='+encodeURIComponent(location.href) + '&pic=' + document.getElementById("6-class-face").src,'_blank','width=450,height=400');
 }
 
 //function share(){alert('share');}
@@ -745,23 +827,53 @@ function bind_select() {
     $("#last-weibo-btn").bind('click', function(){
         lastweibo();
     })
-    $("#delimg-btn").bind('click', function(){
-        delimg();
+    $("#next-his-btn").bind('click', function(){
+        next_his();
     })
+    $("#last-his-btn").bind('click', function(){
+        last_his();
+    })
+    //$("#delimg-btn").bind('click', function(){
+    //    delimg();
+    //})
     $("#share-btn").bind('click', function(){
         share();
     })
+    $("#homepage-btn").bind('click', function(){
+        window.location.href = '/static/web/homepage.html'
+    })
+    $("#about-us-btn").bind('click', function(){
+        logout();
+        window.location.href = '/static/web/homepage.html'
+    })
     $("#datepicker").datepicker({dateFormat: 'yy/mm/dd', rangeSelect: true, firstDay: 1, showOn: 'both',
-            buttonImageOnly: true, buttonImage: '../img/calendar.jpg', minDate:new Date("2012/01/04"), maxDate:new Date("2012/02/13"),
+            buttonImageOnly: true, buttonImage: '../img/calendar.jpg', minDate:new Date("2011/08/01"), maxDate:new Date("2012/12/22"),
             onSelect: function(dateText, inst) {
                 d = new Date(dateText);
-                var daynum = (d.getTime()/1000 - basetime)/adaytime + 1;
-                load_stress_time(get_uid(),daynum-3,daynum+3);
+                cur_day = (d.getTime()/1000 - basetime)/adaytime + 1;
+                load_stress_time(style);
             }});
+}
+
+function increase_day(){
+	cur_day = cur_day+7;
+	if (cur_day>513){cur_day=513;}
+	load_stress_time(style);
+}
+
+function decrease_day(){
+	cur_day=cur_day-7;
+	if(cur_day<4){cur_day=4;}
+	load_stress_time(style);
 }
 
 function get_uid() {
     return 1;
+}
+
+function changestyle(){
+	style=1-style;
+	load_stress_time(style);
 }
 
 $(document).ready(function() {
@@ -769,10 +881,11 @@ $(document).ready(function() {
     uid = get_uid();
     //load_stress(uid);
     //load_keyword(uid);
-    upload_prepare();
-    load_stress_time(uid,1,7);
+    //upload_prepare();
+    load_stress_time(style);
     //predict();
-    bind_homepage();
+    get_history(1);
+    //bind_homepage();
     //myChart = echarts.init(document.getElementById('main')); 
 })
 

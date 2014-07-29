@@ -17,6 +17,7 @@ urlpatterns = patterns('',
   url(r'^api/predict$', 'mysite.api.predict'),
   url(r'^api/code$', 'mysite.api.code'),
   url(r'^api/lastweibo$', 'mysite.api.lastweibo'),
+  url(r'^api/logout$','mysite.api.logout'),
     # Examples:
     # url(r'^$', 'mysite.views.home', name='home'),
     # url(r'^mysite/', include('mysite.foo.urls')),
